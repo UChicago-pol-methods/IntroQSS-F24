@@ -13,8 +13,6 @@ format:
 
 ---
 
-<!-- this seems too short. Is there something I can add? Marginal PDF in the continuous case. something about multivariate generalizations. I can add this tomorrow. --> 
-
 ```{r}
 #| warning: false
 #| message: false
@@ -385,7 +383,7 @@ Let $Y$ denote number of heads in **one** toss of a fair coin.
 
 ```{r}
 tibble(x = c(0, 0, 1, 1, 2, 2), y = rep(c(0, 1), 3), `Pr[X = x, Y = y]` = c("1/8", "1/8", "1/4", "1/4", "1/8", "1/8")) |> 
-  kableExtra::kbl(booktabs = T)
+  tinytable::tt()
 ```
 
 
