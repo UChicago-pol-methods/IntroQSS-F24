@@ -1,0 +1,196 @@
+---
+title: "PLSC30500, Fall 2023"
+subtitle: "Part 0. Introduction"
+author: "Andy Eggers"
+format: 
+  revealjs:
+    smaller: false
+    slide-number: c/t
+    css: ["default", "uchicago_pol_meth.css"]
+    theme: simple
+    echo: false
+    embed-resources: true
+---
+
+# Welcome! 
+
+## This course
+
+- Instructor: Andy Eggers
+- Teaching assistant: Moksha Sharma
+- part of a sequence:
+  - Intro to Quant Soc Sci **(this course)** (fall)
+  - Causal Inference (winter)
+  - Linear Models (spring)
+
+
+## Our objectives 
+
+- give a strong foundation for further study
+- give a taste of what is fun about quantitative social science 
+    - mathematical rigor and clarity
+    - thinking about estimation, uncertainty, causality
+
+
+## Broad plan
+
+Five modules:
+
+- Probability (1.1, 1.2, 2.1, 2.2)
+- Summarizing distributions (3.1, 3.2, 4.1, 4.2)
+- Estimation (5.1, 5.2, 6.1)
+- Inference (6.2, 7.1, 7.2)
+- Regression (8.1, 8.2, 9.1, 9.2)
+
+
+## Expectations about background
+
+Useful (not required) to have exposure to
+
+- math (semi-recently)
+- probability & statistics
+- econometrics/regression modeling
+- programming
+
+. . .
+
+If you have don't have much exposure to $X$, you may have to work harder on $X$.
+
+If you have lots of exposure to all of the above, we believe you can still learn something.
+
+
+## Expectations for the course {.smaller}
+
+- Read the syllabus (link from Canvas page and Github)
+- Prepare for class: attempt the main reading (Aronow & Miller); ask for easier readings if necessary 
+- If you are stuck on reading/assignments: 
+    1. Use google first, or e.g. ChatGPT
+    1. Ask your question on our private StackOverflow (https://stackoverflowteams.com/c/uchicagopolmeth)
+    1. Or if you're brave, ask on the real StackOverflow (https://stackoverflow.com/) if it's about `R` or CrossValidated (https://stats.stackexchange.com/) if it's about stats. 
+- If you are confused in class, ask a question
+
+. . .
+
+Please also *answer* questions on our private StackOverflow.
+
+If you email me a question, I am likely to tell you to put it on our StackOverflow.
+
+
+## Labs 
+
+Taught by Moksha, Fridays, Cobb 301.
+
+- Lab 1: 12:30-1:20
+- Lab 2: 1:30-2:20
+
+
+## Assessment 
+
+- 40% problem sets (8 in all)
+- 10% class participation
+- 20% in-class midterm on October 19
+- 30% final take-home exam due December 5
+
+## Websites
+
+All slides and assignments will be distributed via the course Github:
+
+<https://github.com/UChicago-pol-methods/IntroQSS-F23>
+
+Download files one by one, or `git clone` and frequently update. 
+
+. . . 
+
+Homework submission via Canvas page.
+
+
+## Technical setup
+
+By lab on Friday (ideally sooner), make sure you do this:
+
+1. install `R` from https://cran.rstudio.com/ 
+1. Install RStudio from https://www.rstudio.com/products/rstudio/download/
+1. In RStudio install `tidyverse` and `tinytex`
+
+```{r eval = F}
+# from https://yihui.org/tinytex/:
+install.packages('tinytex')
+tinytex::install_tinytex()
+```
+
+. . . 
+
+If you can "knit" the first homework (`ps1_2023_probability.qmd`) into a PDF, you are all set.
+
+<!-- If you run into trouble, use (free) RStudio Cloud until you resolve the issue. --> 
+
+
+# Motivation
+
+
+## What most applied social scientists "know" about statistics
+
+Most social scientists "know" a few things about
+
+- Linear regression (OLS) and two other estimation techniques (logit, probit)
+- **Statistical inference** (standard errors, p-values, null hypothesis)
+
+. . .
+
+That's it.
+
+## What most applied social scientists "know" about linear regression (OLS) {.smaller}
+
+:::{.incremental}
+
+- We use **regression** (ordinary least squares, OLS) to measure relationships between a **dependent variable** (DV, left-hand-side (LHS) variable, outcome variable) $Y$ and **independent variables** (right-hand-side (RHS) variables, covariates, predictors) $X_1$, $X_2$, $X_3$, etc: e.g. $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots$ 
+- We call the estimated "effect" of each variable a regression **coefficient**
+- [For regression to work, you need a lot of assumptions,]{.orange} e.g. [relationships have to be linear]{.red}, [the error term (or the dependent variable) needs to be normally distributed]{.red} 
+- A regression coefficient for $X_1$ measures how much $Y$ is predicted to change with a **one-unit increase** in $X_1$, holding fixed $X_2$, $X_3$, etc 
+- Sometimes this coefficient is a good estimate of the **(causal) effect** of $X_1$ on $Y$, i.e. what would happen if you changed $X_1$
+- You can use an **interaction term** to get a coefficient that measures how the "effect" of $X_1$ depends on the value of $X_2$:  $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 \times X_2 + \ldots$
+
+:::
+
+## A regression table
+
+![](assets/anzia_berry_reg_table.png){fig-align="center"}
+
+
+
+## What most applied social scientists "know" about other estimation techniques
+
+:::{.incremental}
+
+- When the dependent variable is **binary** (i.e. only 0 or 1), you [shouldn't use OLS]{.orange} 
+- Instead you should use **logit** or **probit**
+- Logit and probit coefficients are hard to understand
+
+:::
+
+## What most applied social scientists "know" about statistical inference {.smaller}
+
+:::{.incremental}
+
+- Statistical software gives you a **standard error** for each regression coefficient. A bigger standard error means [we are more uncertain]{.orange} what that coefficient really is.
+- The **null hypothesis** is usually the claim that there is no relationship. We do **hypothesis testing** to see if we can reject the null hypothesis. 
+- If the **p-value** on your coefficient is below .05, your coefficient is **statistically significant** and you can **reject the null hypothesis**. This means [the coefficient probably isn't zero]{.orange} because [the relationship is unlikely to have occurred by chance]{.red}. If you get a p-value above .05, [you didn't find anything]{.red} and [your analysis didn't work]{.red}. 
+
+:::
+
+## What we want you to know 
+
+You need to know what is above -- at least, the correct parts! (e.g. reading regression table, interpreting interaction terms) 
+
+. . .
+
+But also, we want you 
+
+- to avoid the misconceptions (the stuff in [orange]{.orange} and [red]{.red})
+- to understand common approaches to uncertainty (e.g. standard errors) and hypothesis testing (e.g. p-values): the logic behind these approaches and their limits.
+- to see what coin flips and urns have to do with social science.
+
+::: {.notes}
+You might decide that standard errors and hypothesis testing aren't for you! 
+:::
+

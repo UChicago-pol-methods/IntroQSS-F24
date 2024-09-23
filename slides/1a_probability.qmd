@@ -1,0 +1,502 @@
+---
+title: "PLSC30500, Fall 2023"
+subtitle: "Part 1. Probability Theory (part a)"
+author: "Andy Eggers"
+format: 
+  revealjs:
+    smaller: false
+    slide-number: c/t
+    css: ["default", "uchicago_pol_meth.css"]
+    theme: simple
+    echo: false
+    embed-resources: true
+
+---
+
+```{r}
+#| warning: false
+#| message: false
+
+library(tidyverse)
+
+```
+
+
+# Motivation & big picture 
+
+## Coin flips and urn problems
+
+You will see a lot of problems about coin flips and selecting balls from urns.
+
+What does this have to do with social science? 
+
+
+![](assets/urn.png){width=60% fig-align="center"}
+
+
+## Sampling
+
+
+Sometimes a coin flip, an urn, or a similar device actually determines which **units/observations** we see: who gets selected for a survey.
+
+The urn problems help us understand how the **sample** might differ from the **population** (and thus how certain we can be about characteristics of the population using the sample).
+
+
+
+## Treatment assignment
+
+Sometimes a coin flip, an urn, or a similar device actually determines which units/observations get a random **treatment**, e.g. in a **randomized experiment** or the Vietnam draft lottery.
+
+The urn problems help us compare differences we see between treatment and control units to differences we might see by chance if the treatment had no effect.
+
+
+## Urns as metaphors
+
+
+Even when there was no random selection (e.g. data on all countries) we can *act as if there was*, or act as if the dependent variable (e.g. revolution) has a random component. 
+
+Then the urn problems again help us compare the "sample" to the "population", or observed reality to what might have happened in an alternate history *if we treat our ignorance as chance*.
+
+
+## Probability vs statistical inference {.smaller}
+
+::::{.columns}
+
+::: {.column width="50%"}
+
+:::{.fragment}
+
+In probability problems, we know what's in the urn and we want to describe the possible **draws**.
+
+![](assets/urn.png){width=60% fig-align="center"}
+
+:::
+:::
+
+
+::: {.column width="50%"}
+
+:::{.fragment}
+In many statistics problems, we have one draw and we want to speculate what might be in the urn (i.e. population).
+
+![](assets/urn_question_marks.png){width=80% fig-align="center"}
+:::
+:::
+
+::::
+
+
+# Probability foundations
+
+## What is probability? {.smaller}
+
+
+
+::::{.columns}
+
+::: {.column width="50%"}
+
+:::{.fragment}
+
+A **random generative process** is a repeatable mechanism that can select an outcome from a set of possible outcomes.
+
+
+Each **draw** or **realization** of the process may be uncertain (to the typical observer), but the frequency of each **event** can be described.  
+
+e.g. flipping a coin, rolling a die, drawing a ball from an urn.
+
+:::
+:::
+
+
+::: {.column width="50%"}
+
+:::{.fragment}
+![](assets/urn.png){width=50% fig-align="center"}
+
+
+
+:::
+:::
+
+::::
+
+
+. . .
+
+
+**Frequentist definition of probability**: The **probability** of an event (e.g. "green ball is chosen") is the proportion of many, many draws producing that event. 
+
+. . . 
+
+**Bayesian definition of probability**: The **probability** of an event is an observer's degree of belief that the event will happen or has happened. Logical and subjective variants.
+
+ 
+
+## Aside on mathematical notation
+
+
+![](assets/am_math_appx.png){width=20% fig-align="center"}
+
+
+## Sample space {.smaller}
+
+Sample space $\Omega$ ("Omega") is the set of all possible outcomes of the random generative process. Each element $\omega$ ("omega") is a unique outcome of the process.
+
+. . .
+
+For a coin flip, $\Omega = \{H, T\}$; $\omega \in \{H, T\}$.
+
+. . .
+
+For a single roll of a six-sided die, $\Omega = \{1, 2, 3, 4, 5, 6\}$.
+
+. . .
+
+How about for a single roll of two six-sided die? 
+
+. . . 
+
+$$\Omega = \{(x, y) \in \mathbb{Z}^2 : 1 \leq x \leq 6, 1 \leq y \leq 6 \}$$
+("Set-builder notation", used w/o explanation at A&M p. 5)
+ 
+Easier examples: 
+
+- $\{x \in \mathbb{R} : x > 0\}$
+- $\{x \in \mathbb{Z} : 2 \leq x \leq 5 \}$
+ 
+:::{.notes}
+All states of the world that can result from the process.
+:::
+ 
+## Sample space (2)
+
+$$\Omega = \{(x, y) \in \mathbb{Z}^2 : 1 \leq x \leq 6, 1 \leq y \leq 6 \}$$
+
+. . .
+
+i.e., $\Omega = \{(1,1), (1,2), \ldots (1,6), (2,1), (2,2), \ldots, (6,6) \}$
+
+```{r}
+#| fig-height: 3
+#| fig-width: 3
+#| echo: false
+#| fig-align: center
+expand_grid(x = 1:6, y = 1:6) |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point() +
+  theme_bw()
+```
+
+## Events and event spaces {.smaller}
+
+An **event** is a collection of outcomes to which we want to assign a probability. (A subset of the sample space.)
+
+. . .
+
+Examples: 
+
+- rolling a 3 [(Here, an outcome is an event)]{.gray}
+- rolling an even number
+- in an election, a tie for first between candidates $a$ and $b$
+
+. . .
+
+An **event space** $S$ is a set of events composed in a particular way (for technical reasons): 
+
+- a set of events of interest [(e.g. $A$ = $a$ wins, $B$ = $b$ wins, $T$ = $a$ and $b$ tie)]{.gray}
+- their complements [($A^C$ = $a$ doesn't win, $B^C$ = $b$ doesn't win, $T^C$ = $a$ and $b$ don't tie)]{.gray}
+- the **union** of each subset of events [(e.g. $A \cup B$ = $a$ wins OR $b$ wins, $A \cup T$ = $a$ wins or ties, $\ldots$)]{.gray}
+
+
+
+## Probability measure & Kolmogorov axioms {.smaller}
+
+A **probability measure**  is a function $P : S \rightarrow \mathbb{R}$ that assigns a probability to every event in the event space. 
+
+. . .
+
+**Kolmogorov axioms**: $(\Omega, S, P)$ is a **probability space** if it satisfies the following: 
+
+- Non-negativity: $\forall A \in S$, $P(A) \geq 0$  [(probabilities are positive)]{.dark-gray}
+- Unitarity: $P(\Omega) = 1$ [(probability that something happens is 1)]{.dark-gray}  
+- Countable additivity: if $A_1, A_2, A_3, \ldots \in S$ are **pairwise disjoint**, then 
+
+$$P(A_1 \cup A_2 \cup A_3 \cup \ldots ) = P(A_1) + P(A_2) + P(A_3) + \ldots = \sum_i P(A_i) $$
+[(for events that cannot co-occur, the probability of one of the event occurring is the sum of the individual probs)]{.dark-gray}
+
+
+## Basic properties of probability
+
+Let $(\Omega, S, P)$ be a probability space. Then 
+
+- Monotonicity: $\forall A, B \in S$, if $A \subseteq B$, then $P(A) \leq P(B)$
+- Subtraction rule: $\forall A, B \in S$, if $A \subseteq B$, then $P(B \setminus A) = P(B) - P(A)$
+- Zero probability of the empty set: $P(\emptyset) = 0$
+- Probability bounds: $\forall A \in S$, $0 \leq P(A) \leq 1$
+- Complement rule: $\forall A \in S$, $P(A^C) = 1 - P(A)$
+
+. . . 
+
+Let's prove it! (on board, also see A&M page 8, or slide notes by pressing `s`)
+
+:::{.notes}
+If $A \subseteq B$, then $B = A \cup (B \setminus A)$.
+
+Countable additivity implies $P(B) = P(A) + P(B \setminus A)$
+
+So $P(A) \leq P(B)$ (**monotonicity**).
+
+$P(B \setminus A) = P(B) - P(A)$ (**subtraction rule**).
+
+$P(\emptyset) = P(A \setminus A) = P(A) - P(A)$ (by subtraction rule) $ = 0$ (**zero prob of empty set**)
+
+$A \subseteq \Omega$ (by definition). $P(A) \geq 0$ (by non-negativity, one of the axioms), and $P(\Omega = 1)$ (by unitarity, one of the axioms) (**probability bounds**)
+
+$\Omega = A \cup (\Omega \setminus A) = A \cup A^C$ (by definition of $A^C$). $P(\Omega) = P(A) + P(A^C)$ (by countable additivity). $P(\Omega) = 1$ (by unitarity, one of the axioms), so $P(A^C) = 1 -  P(A)$.
+
+:::
+
+
+## An aside on what we're doing
+
+Goal: a strong *system of understanding*; every statement follows from 
+
+- definitions [(what we mean by $X$)]{.gray}
+- axioms [(assertions taken to be self-evident requirements)]{.gray}
+- assumptions [(assertions that usefully restrict/simplify)]{.gray}
+- logical argument following from above
+
+. . . 
+
+Every statement supported, no unnecessary assumptions.
+
+There are "rules" (e.g. addition rule) and "laws" (e.g. law of total probability) but no one made them (directly).  
+
+
+## Joint probability and the addition rule  
+
+**Def 1.1.5**: For $A, B \in S$, the **joint probability** of $A$ and $B$ is the probability that both $A$ and $B$ happen, i.e. $P(A \cap B)$
+
+. . . 
+
+**Addition rule**: For $A, B \in S$, 
+
+$$ P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
+Let's prove it! (Board, or book or `S`)
+
+:::{.notes}
+$A \cup B = (A \setminus (A \cap B)) \cup (B \setminus (A \cap B)) \cup (A \cap B)$
+
+By countable additivity, 
+
+$P(A \cup B) = P(A \setminus (A \cap B)) + P(B \setminus (A \cap B)) + P(A \cap B)$
+
+By subtraction rule, 
+
+$P(A \cup B) = P(A) - P(A \cap B) + P(B) - P(A \cap B) + P(A \cap B)$
+
+Rearranging, $P(A \cup B) = P(A) + P(B) - P(A \cap B)$. 
+
+:::
+
+
+## Addition rule, visually {.smaller}
+
+
+$$ P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
+
+
+```{tikz venn}
+#| fig-width: 5 
+#| fig-align: center
+\begin{tikzpicture}
+    % Draw the rectangles
+    \draw (0,0) rectangle (5,3);
+    \fill[gray, opacity=0.25] (1.75,1.5) circle (1.2);
+    \draw (1.75,1.5) circle (1.2);
+    \fill[gray, opacity=0.5] (3.25,1.5) circle (1.2);
+    \draw (3.25,1.5) circle (1.2);
+
+    % Label the circles
+    \node at (1.5,1.5) {$A$};
+    \node at (3.5,1.5) {$B$};
+    \node at (2.5,1.5) {$A \cap B$};
+\end{tikzpicture}
+```
+
+
+Assumptions behind this use of Venn diagram: 
+
+- think of each pixel in the rectangle as an outcome $\omega$ in the sample space $\Omega$
+- each outcome has equal probability
+- $A$ and $B$ are events (sets of outcomes)
+
+
+
+## Conditional probability 
+
+**Def 1.1.8**: For $A, B$ with $P(B) > 0$, the **conditional probability** of $A$ given $B$ is 
+
+$$P(A \mid B) = \frac{P(A \cap B)}{P(B)}$$
+
+```{tikz venn}
+#| fig-width: 4 
+#| fig-align: center
+```
+
+. . . 
+
+Read $P(A \mid B)$ as "probability of $A$ given $B$". 
+
+## Equivalently: product rule
+
+For $A, B$ with $P(B) > 0$, 
+
+$$P(A \cap B) = P(B) P(A | B)$$
+
+```{tikz venn}
+#| fig-width: 4 
+#| fig-align: center
+```
+
+. . .
+
+[Here, product rule follows from definition of conditional probability; in logical approach (Cox's Theorem) it follows from consistency axioms.]{.smaller .gray} 
+
+## Partition
+
+If $A_1, A_2, \ldots \in S$ is nonempty and pairwise disjoint, and $\Omega = A_1 \cup A_2 \cup \ldots$, then  $A_1, A_2, \ldots$ is a **partition** of $\Omega$. 
+
+. . . 
+
+```{tikz ltp}
+#| fig-width: 6 
+#| fig-align: center
+\begin{tikzpicture}
+    % Define the widths of the strips
+    \def\stripwidths{{1, 2, 1.5, 2.5}}
+    
+    % Set the total width and height of the rectangle
+    \pgfmathsetmacro\totalwidth{7}
+    \pgfmathsetmacro\totalheight{4}
+    
+    % Draw the rectangle
+    \draw (0, 0) rectangle (\totalwidth, \totalheight);
+    
+    % Draw the vertical strips
+    \foreach \x/\j in {0/1, 1/2, 3/3, 4.5/4} {
+        \draw (\x, 0) -- ++(0, \totalheight) node[very near end, right=5pt] {$A_\j$};
+    }
+\end{tikzpicture}
+```
+
+
+
+## Law of total probability 
+
+If $\{A_1, A_2, \ldots \}$ is a partition of $\Omega$ and $P(A_i) > 0 \, \forall \, i$, then 
+
+$$P(B) = \sum_i P(B\cap A_i) = \sum_i P(B \mid A_i) P(A_i)$$
+
+. . . 
+
+```{tikz ltp2}
+#| fig-width: 6 
+#| fig-align: center
+\begin{tikzpicture}
+    % Define the widths of the strips
+    \def\stripwidths{{1, 2, 1.5, 2.5}}
+    
+    % Set the total width and height of the rectangle
+    \pgfmathsetmacro\totalwidth{7}
+    \pgfmathsetmacro\totalheight{4}
+    
+    % Draw the rectangle
+    \draw (0, 0) rectangle (\totalwidth, \totalheight);
+    
+    % Draw the vertical strips
+    \foreach \x/\j in {0/1, 1/2, 3/3, 4.5/4} {
+        \draw (\x, 0) -- ++(0, \totalheight) node[very near end, right=5pt] {$A_\j$};
+    }
+
+    % Draw circle for event B
+    \fill[gray, opacity=0.5] (3.25,1.75) circle (1.5);
+    \draw (3.25,1.75) circle (1.5);
+
+    % Label the circle
+    \node at (3.5,1.75) {$B$};
+
+\end{tikzpicture}
+```
+
+## Independence of events
+
+**Definition**: Events $A, B \in S$ are **independent** if $P(A \cap B) = P(A)P(B)$
+
+```{tikz ind}
+#| fig-width: 6 
+#| fig-align: center
+\usetikzlibrary{decorations.pathreplacing}
+\begin{tikzpicture}
+
+    % Draw the overall rectangle
+    \draw (0, 0) rectangle (5, 3);
+    
+    % Draw the event rectangles
+    \fill[blue, opacity=0.5] (0,0) rectangle (2, 3);
+    \fill[red, opacity=0.2] (0,2) rectangle (5, 3);
+
+    % Event boundaries 
+    \draw (2, 0) -- ++(0, 3);
+    \draw (0, 2) -- ++(5, 0);
+
+    % Label the events
+    \node at (1,1.5) {$A$};
+    \node at (2.5,2.5) {$B$};
+
+    \draw [decorate, decoration={brace, amplitude=5pt, mirror}] (5,2) -- (5,3) node[midway, right=5pt] {$P(B)$};
+    \draw [decorate, decoration={brace, amplitude=5pt, mirror}] (0,0) -- (2,0) node[midway, below=5pt] {$P(A)$};
+
+\end{tikzpicture}
+```
+
+
+. . . 
+
+Informally, knowing $A$ occurs does not tell you anything about whether $B$ occurs.
+
+
+## Independence and conditional probability 
+
+**Theorem 1.1.16** For $A, B \in S$ with $P(B) > 0$, $A$ and $B$ are independent (i.e. $A \perp \!\!\! \perp B$) if and only if $P(A \mid B) = P(A).$ 
+
+. . .
+
+**Proof:**
+
+$A \perp \!\!\! \perp B$ $\iff P(A \cap B) = P(A)P(B)$  [(definition)]{.gray}
+
+. . . 
+
+$A \perp \!\!\! \perp B$  $\iff P(A \mid B) P(B) = P(A)P(B)$  [(product rule)]{.gray}
+
+. . . 
+
+$A \perp \!\!\! \perp B$ $\iff P(A \mid B) = P(A).$  $\,\, \blacksquare$ [(divide by $P(B)$)]{.gray}
+
+. . . 
+
+In subjective terms, knowing $B$ occurred does not affect our assessment of probability that $A$ occurred. 
+
+
+## Independent? 
+
+(Recall: events $A$ and $B$ independent means $P(A \cap B) = P(A)P(B)$ and $P(A|B) = P(A)$)
+
+Pick a student at random from the university. Are $A$ and $B$ independent in the following examples?
+
+- $A$ = student is undergraduate, $B$ = student is under 22 years old
+- $A$ = student is studying biology, $B$ = student is breathing
+- $A$ = student is woman, $B$ = student has brown hair
+

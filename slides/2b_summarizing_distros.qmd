@@ -1,0 +1,725 @@
+---
+title: "PLSC30500, Fall 2023"
+subtitle: "Part 2. Summarizing distributions (part b)"
+author: "Andy Eggers"
+format: 
+  revealjs:
+    smaller: false
+    slide-number: c/t
+    css: ["default", "uchicago_pol_meth.css"]
+    theme: simple
+    echo: false
+    embed-resources: true
+
+---
+
+```{r}
+#| warning: false
+#| message: false
+
+library(tidyverse)
+knitr::opts_chunk$set(dev = "ragg_png")
+```
+
+
+
+
+# Summarizing joint distributions {background-image="assets/joint_distribution.png" background-size="750px" background-repeat="repeat"}
+
+
+## Motivation
+
+Suppose we have two RVs $X$ and $Y$ 
+
+- number of heads in one coin flip and number of green balls drawn from urn in 6 tries
+- age and height of randomly selected student
+- whether randomly selected citizen served in military and supports a foreign war
+
+. . .
+
+We know the joint PMF/PDF $f(x, y)$ and joint CDF $F(x, y)$.
+
+. . .
+
+How can we summarize the relationship between $X$ and $Y$? 
+
+
+## Covariance  {.smaller}
+
+$$\text{Cov}[X, Y] = E\left[  (X - E[X])(Y - E[Y]) \right]$$ 
+
+. . . 
+
+Intuitively, "Does $X$ tend to be above $E[X]$ when $Y$ is above $E[Y]$? (And by how much?)"
+
+. . . 
+
+$$
+f(x,y) = \begin{cases}
+1/3 & x = 0, y = 0 \\\
+1/6 & x = 1, y = 0 \\\
+1/2 & x = 1, y = 1 \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+What is $E[X]$? What is $E[Y]$? 
+
+. . .
+
+Then compute expectation of $(X - E[X])(Y - E[Y])$ (function of two RVs) as above.
+
+
+## Variance and covariance
+
+Compare: 
+
+\begin{align}\text{Cov}[X, Y] &= E\left[  \color{blue}{(X - E[X])}\color{orange}{(Y - E[Y])} \right] \\  
+\text{V}[X] &= E\left[  \color{blue}{(X - E[X])}\color{blue}{(X - E[X])} \right]\end{align}
+
+. . . 
+
+- Variance of $X$ is covariance between $X$ and itself. 
+- Variance can't be negative but covariance can
+- A justification for $^2$ in variance formula
+
+## Geometric representation (1) {.smaller}
+
+Plot the points in $\text{Supp}[X, Y]$ on two axes with point size proportional to $f(x, y)$.
+
+Divide the $x, y$ plane into quadrants defined by $x = E[X]$ and $y = E[Y]$. 
+
+```{r}
+dat <- tibble(x = c(0, 1, 1), y = c(0, 0, 1), fxy = c(1/3, 1/6, 1/2))
+EX <- dat |> 
+  summarize(sum(x*fxy)) |> 
+  as.numeric()
+EY <- dat |> 
+  summarize(sum(y*fxy)) |> 
+  as.numeric()
+covar <- dat |> 
+  summarize(sum(fxy*(x - EX)*(y - EY)))
+dat |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point(aes(size = fxy), show.legend = F) + 
+  geom_vline(xintercept = EX, lty = 2) +
+  geom_hline(yintercept = EY, lty = 2) + 
+  theme_minimal() -> p
+p
+```
+
+
+
+
+## Geometric representation (2) {.smaller}
+
+For each point $(x, y) \in \text{Supp}[X, Y]$, create a rectangle with $(x,y)$ at one corner and $(E[X], E[Y])$ at the opposite corner.
+
+Shade the rectangle green in quadrants I and III (where $(x - E[X])(y - E[X]) > 0$), otherwise red, with intensity proportional to $f(x,y)$.
+
+Covariance (roughly) measures how much green vs red there is.
+
+```{r}
+#| fig-align: center
+make_vertices_from_dat_row <- function(dat_row, label, EX, EY){
+  expand_grid(x = c(dat_row$x, EX),
+              y = c(dat_row$y, EY),
+              label = label,
+              col = ifelse((dat_row$x - EX)*(dat_row$y - EY) > 0, "green", "red"),
+              fxy = dat_row$fxy)[c(1,2,4,3,1),]
+}
+datt <- bind_rows(
+  make_vertices_from_dat_row(dat[1,], "A", EX, EY),
+  make_vertices_from_dat_row(dat[2,], "B", EX, EY),
+  make_vertices_from_dat_row(dat[3,], "C", EX, EY)
+)
+p +
+  geom_polygon(data = datt, aes(fill = col, alpha = fxy), show.legend = F) + 
+  scale_fill_manual(values = c("green", "red")) + 
+  labs(title = str_c("Covariance: ", round(covar, 2)))
+```
+
+
+
+## Geometric representation (3) {.smaller}
+
+<!-- another example -- maybe make a function? --> 
+
+```{r}
+#| fig-align: center
+make_cov_plot <- function(pmf){
+  EX <- pmf |> 
+    summarize(sum(x*fxy)) |> 
+    as.numeric()
+  EY <- pmf |> 
+    summarize(sum(y*fxy)) |> 
+    as.numeric()
+  covar <- pmf |> 
+    summarize(sum(fxy*(x - EX)*(y - EY)))  
+  
+  pmf |> 
+    ggplot(aes(x = x, y = y)) + 
+    geom_point(aes(size = fxy), show.legend = F) + 
+    geom_vline(xintercept = EX, lty = 2) +
+    geom_hline(yintercept = EY, lty = 2) + 
+    theme_minimal() -> p
+  
+  sto <- list()
+  for(i in 1:nrow(pmf)){
+    sto[[i]] <- make_vertices_from_dat_row(pmf[i,], str_c("A", i), EX = EX, EY = EY)
+  }
+  
+  rect_data <- bind_rows(sto)
+  
+  p +
+    geom_polygon(data = rect_data, aes(group = label, fill = col, alpha = fxy), show.legend = F) + 
+    scale_fill_manual(values = c("green", "red")) + 
+    labs(title = str_c("Covariance: ", round(covar, 2)))
+
+}
+
+pmf <- tibble(x = c(0, 1, 0), y = c(0, 0, 1), fxy = c(1/3, 1/6, 1/2))
+make_cov_plot(pmf)
+```
+
+## Geometric representation (4) {.smaller}
+
+
+```{r}
+n <- 7
+set.seed(123)
+pmf <- tibble(x = runif(n),
+              fxy_raw = runif(n)) |> 
+  mutate(y = x + rnorm(n, sd = 1),
+         fxy = fxy_raw/sum(fxy_raw)) 
+
+make_cov_plot(pmf)
+```
+
+## Geometric representation (5) 
+
+
+```{r}
+n <- 7
+pmf <- tibble(x = runif(n),
+              fxy_raw = runif(n)) |> 
+  mutate(y = -x + rnorm(n, sd = 1),
+         fxy = fxy_raw/sum(fxy_raw)) 
+
+make_cov_plot(pmf)
+```
+
+## Alternative formulation
+
+First formulation: 
+
+$$\text{Cov}[X, Y] = E\left[  (X - E[X])(Y - E[Y]) \right]$$ 
+
+. . . 
+
+As with variance, an alternative formulation: 
+
+$$\text{Cov}[X, Y] = E\left[XY\right] - E[X]E[Y]$$ 
+
+. . .
+
+Note: 
+
+- if $E[X] = E[Y] = 0$ (e.g. if recentered), both become $E[XY]$
+- geometrically, can think in terms of areas of rectangles
+
+
+
+## Geometry of $E[XY] - E[X]E[Y]$
+
+::::{.columns}
+
+:::{.column column-width="50%"}
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-align: center
+
+dat1 <- tibble(x = c(1,3),
+       y = c(1,3),
+       fxy = c(.5, .5)) 
+boxes1 <- tibble(x = c(0, 1, 1, 0, 0,  0, 3, 3, 0, 0),
+                y = c(0, 0, 1, 1, 0,  0, 0, 3, 3, 0),
+                group = c(rep("A", 5), rep("B", 5)))
+dat1 |> 
+  ggplot(aes(x, y)) + 
+  geom_point(aes(size = fxy), show.legend = F) + 
+  coord_fixed(xlim = c(0,4), ylim = c(0,4)) -> p1
+
+p1
+
+```
+
+
+:::
+:::{.column column-width="50%"}
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-align: center
+dat2 <- tibble(x = c(1,3),
+       y = c(3,1),
+       fxy = c(.5, .5))
+boxes2 <- tibble(x = c(0, 1, 1, 0, 0,  0, 3, 3, 0, 0),
+                y = c(0, 0, 3, 3, 0,  0, 0, 1, 1, 0),
+                group = c(rep("A", 5), rep("B", 5)))
+
+dat2 |> 
+  ggplot(aes(x, y)) + 
+  geom_point(aes(size = fxy), show.legend = F) +
+  coord_fixed(xlim = c(0,4), ylim = c(0,4)) -> p2
+
+p2
+
+```
+
+:::
+::::
+
+
+
+## Geometry of $E[XY] - E[X]E[Y]$ (2)
+
+::::{.columns}
+
+:::{.column column-width="50%"}
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-align: center
+
+p1 + 
+  geom_polygon(data = boxes1, aes(fill = group, group = group), alpha = .5, show.legend = F) + 
+  scale_fill_manual(values = c("red", "blue")) + 
+  geom_vline(xintercept = 2, lty = 2) + 
+  geom_hline(yintercept = 2, lty = 2)
+  
+```
+
+
+:::
+:::{.column column-width="50%"}
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-align: center
+
+p2 + 
+  geom_polygon(data = boxes2, aes(fill = group, group = group), alpha = .5, show.legend = F) + 
+  scale_fill_manual(values = c("red", "blue")) +
+  geom_vline(xintercept = 2, lty = 2) + 
+  geom_hline(yintercept = 2, lty = 2)
+
+```
+
+:::
+::::
+
+## Linearity of expectations, but not variances 
+
+If $f$ is  a *linear function* or *linear operator*, then $f(x + y) = f(x) + f(y)$. (**Additivity** property.)
+
+. . .
+
+<br>
+
+Recall linearity of expectations: $E[X + Y] = E[X] + E[Y]$. 
+
+. . . 
+
+<br>
+
+
+But $\text{Var}[X + Y] \neq \text{Var}[X] + \text{Var}[Y]$
+
+Why not? 
+
+
+## Variance rule (non-linearity of variance) {.smaller}
+### A different proof from A&R 2.2.3
+
+$$\begin{aligned}
+\text{Var}(X+Y) &= E[(X + Y - E[X + Y])^2] \\\
+&= E[(X - E[X] + Y - E[Y])^2] \\\
+&= E[(\tilde{X} + \tilde{Y})^2] \\\
+&= E[\tilde{X}^2 + \tilde{Y}^2 + 2 \tilde{X} \tilde{Y}] \\\
+&= E[\tilde{X}^2] + E[\tilde{Y}^2] + E[2 \tilde{X} \tilde{Y}] \\\
+&= E[(X - E[X])^2] + E[(Y - E[Y])^2] + 2E[(X - E[X])(Y - E[Y])] \\\
+&= \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X, Y)
+\end{aligned}$$
+
+
+## Correlation 
+
+The **correlation** of two RVs $X$ and $Y$ with $\sigma[X] > 0$ and $\sigma[Y] > 0$ is 
+
+$$ \rho[X, Y] = \frac{\text{Cov}[X, Y]}{\sigma[X] \sigma[Y]}$$
+
+. . .
+
+Correlation is **scale-invariant**: $\rho[X, Y] = \rho[aX, bY]$ for $a, b > 0$
+
+. . . 
+
+Prove it! 
+
+
+## Proof of scale-invariance of correlation  {.smaller}
+
+\begin{align}
+\text{Cov}[aX, bY] &= E[aX bY] - E[aX]E[bY] \\
+&= ab E[XY] - ab E[X]E[Y] \\
+&= ab (E[XY] - E[X]E[Y]) \\ 
+&= ab \text{Cov}[X, Y] 
+\end{align}
+
+. . . 
+
+
+$$\sigma[aX] = \sqrt{\text{V}[aX]} = \sqrt{a^2 \text{V}[X]} = a \sigma[X]$$ 
+
+. . .
+
+By same argument, $\sigma[bY] = b\sigma[Y]$.
+
+. . . 
+
+So
+
+\begin{align} 
+\rho[aX, bY] &= \frac{\text{Cov}[aX, bY]}{\sigma[aX] \sigma[bY]} \\ 
+&= \frac{ab \text{Cov}[X, Y]}{a \sigma[X] b \sigma[Y]} = \frac{\text{Cov}[X, Y]}{\sigma[X] \sigma[Y]} \\ 
+&= \rho[X, y]
+\end{align}
+
+## Conditional expectations {.smaller}
+
+We spent time on **expectations**: 
+
+$$E[Y] = \sum_y y f(y).$$
+
+. . . 
+
+Also on **conditional distributions**: 
+
+$$f_{Y|X}(y|x) = \frac{f(x, y)}{f_X(x)}$$
+
+. . . 
+
+Combining the two ideas, we get **conditional expectations**: 
+
+$$E[Y \mid X = x] = \sum_y y f_{Y|X}(y \mid x).$$
+
+i.e. the expectation of $Y$ at some $x$.
+
+
+## Illustration 
+
+
+```{r}
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 4
+n <- 1000
+dat <- tibble(x = runif(n, min = -.5, max = 3)) |> 
+  mutate(mu = 3*x + 8*x^2 - 3*x^3,
+         y = rnorm(n, mean = mu, sd = 3))
+p1 <- dat |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point(alpha = .5, size = 2) +
+  theme_bw() + 
+  geom_line(aes(y = mu), col = "red", lwd = 2) + 
+  coord_cartesian(xlim = c(0, 2.75),
+                  ylim = c(-10, 25)) 
+p1
+```
+
+[(Red line represents $E[Y | X = x]$, dots a sample from $f(x, y)$)]{.gray}
+
+
+## Illustration (2)
+
+
+```{r}
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 4
+n <- 1500
+dat <- tibble(x = rnorm(n, mean = 2)) |> 
+  mutate(mu = 3*x + 8*x^2 - 3*x^3,
+         y = rnorm(n, mean = mu, sd = 3))
+p <- dat |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point(alpha = .5, size = 2) +
+  theme_bw() + 
+  geom_line(aes(y = mu), col = "red", lwd = 2) + 
+  coord_cartesian(xlim = c(0, 2.75),
+                  ylim = c(-10, 25)) 
+p
+```
+
+[(Red line represents $E[Y | X = x]$, dots a sample from $f(x, y)$)]{.gray}
+
+
+
+
+
+## Conditional variance {.smaller}
+
+Two formulations: 
+
+$$V[Y | X = x] = E[(Y - E[Y | X =x])^2 | X = x]$$
+$$V[Y | X = x] = E[Y^2 | X = x] - E[Y | X =x]^2$$
+
+
+```{r}
+#| fig-align: center
+p1
+```
+
+
+## Conditional variance (2) {.smaller}
+
+
+Two formulations: 
+
+$$V[Y | X = x] = E[(Y - E[Y | X =x])^2 | X = x]$$
+
+$$V[Y | X = x] = E[Y^2 | X = x] - E[Y | X =x]^2$$
+
+```{r, echo = F}
+#| fig-align: center
+tibble(x = runif(n, min = 0, max = 2.75)) |> 
+  mutate(mu = 3*x + 8*x^2 - 3*x^3,
+         y = rnorm(n, mean = mu, sd = 1 + x)) |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point(alpha = .5, size = 2) +
+  theme_bw() + 
+  geom_line(aes(y = mu), col = "red", lwd = 2)
+```
+
+
+
+## Conditional expectations vs Conditional expectation function (CEF) {.smaller}
+
+Conditional expectation $E[Y | X = x]$ is for a specific $x$.
+
+Conditional expectation function (CEF) $E[Y | X]$ is for all $x$.
+
+
+```{r}
+p1 
+```
+
+
+
+
+## CEF as best predictor
+
+The CEF $E[Y | X]$ is the expectation of $Y$ at each $X$.
+
+. . .
+
+We already established that the expectation/mean is the best (in MSE sense) predictor.
+
+. . .
+
+So CEF is the best possible way to use $X$ to predict $Y$.  (See Theorem 2.2.20.)
+
+. . . 
+
+**Multivariate generalization**: $E[Y \mid X_1, X_2, X_3, \ldots, X_n]$ is the best way to use $X_1, \ldots X_n$ to predict $Y$. 
+
+
+## Law of iterated expectations {.smaller}
+
+For random variables $X$ and $Y$,
+
+$$E[Y] = E[E[Y | X]]$$
+
+. . . 
+
+This means there are two ways to get $E[Y]$:
+
+- start with $f(y)$, take expectations: $E[Y] = \sum_y y f(y)$
+<!-- - start with $f(x, y)$, get $f_Y(y) = \sum_x f(x, y)$, take expectations: $E[Y] = \sum_y y f_Y(y)$ -->
+- start with $E[Y \mid X]$ and $f_X(x)$, take expectations: $E[Y] = \sum_x E[Y \mid X=x] f_X(x)$ 
+
+. . . 
+
+In words: An unconditional average ($E[Y]$) can be represented as a weighted average of conditional expectations ($E[Y \mid X]$) with weights taken from the distribution of the variable conditioned on, i.e. $X$.
+
+. . .
+
+<!-- understand two formulations for conditional variance --> 
+
+Why would you want to do that? 
+<!-- connection to LTP --> 
+
+
+## LIE: An intuitive example
+
+A population is 80% female and 20% male.
+
+The average age among females ([$E[Y | X = 1]$]{.gray}) is 25. The average age among males [$E[Y | X = 0]$]{.gray} is 20.
+
+What is the average age in the population [$E[Y]$]{.gray}?
+
+. . .
+
+$$E[E[Y | X]] = .8 \times 25 + .2 \times 20 = 24$$
+
+. . .
+
+See homework for another example.
+
+
+
+## LIE: another example
+
+```{r, echo = F}
+p1
+```
+
+
+
+## LIE: another example (2)
+
+```{r, echo = F}
+n <- 5000
+tibble(x = rnorm(n, mean = 3, sd = 1.5)) |> 
+  mutate(mu = 3*x + 8*x^2 - 3*x^3,
+         y = rnorm(n, mean = mu, sd = 3)) |> 
+  filter(x > 0 & x < 2.75) |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point(alpha = .5, size = 2) +
+  theme_bw() + 
+  geom_line(aes(y = mu), col = "red", lwd = 2)
+```
+
+
+##  How LIE is used in causal inference (preview) {.smaller}
+
+Suppose we want to measure the average effect of participating in a program (e.g. job training, voter education, military mobilization).
+
+. . . 
+
+Call $Y$ the [(unobservable)]{.gray} effect of the treatment. We want the **average treatment effect** (ATE), $E[Y]$.
+
+. . . 
+
+Suppose that comparing participants and non-participants gives us a good estimate of the average treatment effect only within subgroups defined by age ($X$).
+
+. . . 
+
+So we have $E[Y \mid X]$. 
+
+. . .
+
+Now we just combine these estimates (by LIE): $E[Y] = E[E[Y \mid X]] = \sum_{x}  E[Y \mid X = x] f(x)$
+
+
+
+
+## Law of total variance
+
+$$V[Y] = E[V[Y|X]] + V[E[Y|X]]$$
+
+. . . 
+
+In words, the variance of $Y$ can be **decomposed** into the expected conditional variance [($E[V[Y|X]]$)]{.gray} and the variance of the conditional expectation [($V[E[Y|X]]$)]{.gray}.
+
+. . . 
+
+Sometimes called "Ev(v)e's law" because 
+
+$$V[Y] = \color{red}{E}[\color{red}{V}[Y|X]] + \color{red}{V}[\color{red}{E}[Y|X]]$$
+
+## Law of total variance (2)
+
+
+```{r, echo = F}
+p1
+```
+
+
+
+## Best linear predictor (BLP) {.smaller}
+
+
+Suppose we want to predict $Y$ using $X$, and we focus on a linear predictor, i.e. a function of the form $\alpha + \beta X$.
+
+. . . 
+
+The best (minimum MSE) predictor satisfies
+
+$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \mathrm{E}\,[\left(Y - (a + bX)\right)^2]$$
+
+. . . 
+
+The solution (see Theorem 2.2.21) is 
+
+- $\beta = \frac{\textrm{Cov}[X, Y]}{\textrm{V}[X]}$
+- $\alpha = \textrm{E}[Y] - \beta \textrm{E}[X]$ 
+
+. . . 
+
+So we could obtain the BLP from a joint PMF. (See homework.)
+
+
+
+## BLP predicts CEF {.smaller}
+
+::::{.columns}
+
+:::{.column column-width="50%"}
+Above, we were looking for best linear predictor (BLP) of $Y$ as function of $X$: 
+
+$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \mathrm{E}\,[\left(Y - (a + bX)\right)^2]$$
+
+:::
+
+
+:::{.column column-width="50%"}
+
+Same answer if you look for the best linear predictor of the CEF $E[Y | X]$:
+
+$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \mathrm{E}\,[\left(\mathrm{E}[Y|X] - (a + bX)\right)^2]$$
+
+
+:::
+::::
+
+
+```{r, echo = F, fig.height = 3.5}
+p1 + 
+  geom_smooth(method = lm)
+```
+
+
+
+<!-- 
+## Law of total variance (2)
+
+This will be approximately true of a sample (esp. when we know the CEF):
+
+```{r}
+head(dat, 4)
+```
+
+```{r}
+dat |> 
+  summarize(var(y), var(y - mu), var(mu))
+```
+
+Sample variance of $Y$ equals (approx) sample variance of errors plus sample variance of CEF.
+--> 
+
+
+
+

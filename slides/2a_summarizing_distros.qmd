@@ -1,0 +1,572 @@
+---
+title: "PLSC30500, Fall 2023"
+subtitle: "Part 2. Summarizing distributions (part a)"
+author: "Andy Eggers"
+format: 
+  revealjs:
+    smaller: false
+    slide-number: c/t
+    css: ["default", "uchicago_pol_meth.css"]
+    theme: simple
+    echo: false
+    embed-resources: true
+
+---
+
+```{r}
+#| warning: false
+#| message: false
+
+library(tidyverse)
+knitr::opts_chunk$set(dev = "ragg_png")
+```
+
+
+# Expectations {background-image="assets/hbc_great_expectations.png" background-size="450px" background-repeat="repeat"}
+
+
+## Motivation
+
+Suppose we have a random variable $X$, e.g.
+
+- number of heads in 3 coin flips, 
+- whether randomly selected voter plans to vote for Brexit
+- income of randomly selected citizen
+
+. . . 
+
+We know the PMF/PDF $f(x)$ and CDF $F(x)$.
+
+. . . 
+
+How can we summarize this distribution? 
+
+
+## Expected value: discrete case 
+
+For discrete R.V. with probability mass function (PMF) $f(x)$, the *expected value* of $X$ is 
+
+$$E[X] = \sum_x x f(x) $$
+
+Could write 
+
+$$E[X] = \sum_{x \in \text{Supp}[X]} x f(x) $$
+
+
+## Example 
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+
+| $x$  | $f(x)$ |
+|------|:------------:|
+|   0   |     .2     |
+|   1   |     .5     |
+|   3   |     .3     |
+
+:::
+
+::: {.column width="50%"}
+
+$$
+f(x) = \begin{cases}
+.2 & x = 0 \\\
+.5 & x = 1 \\\
+.3 & x = 3 \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+:::
+
+::::
+
+. . . 
+
+What is $E[X] = \sum_x x f(x)$?
+
+. . .
+
+$$\begin{aligned}
+E[X] &=  0 \times .2 + 1 \times .5 + 3 \times .3 \\
+ &= 1.4
+\end{aligned}$$
+
+
+
+## Same PMF
+
+```{r expectationcase}
+dat <- tibble(x = c(0, 0, 1, 1, 3, 3), y = c(0, .2, 0, .5, 0, .3), item = c(1, 1, 2, 2, 3, 3), type = rep(c("bottom", "top"), 3)) 
+
+dat|> 
+  ggplot(aes(x = x, y = y, group = item)) + 
+  geom_line() + 
+  geom_point(data = filter(dat, type == "top")) + 
+  expand_limits(y = .65) +
+  geom_vline(xintercept = .5*1 + .3*3, lty = 2) + 
+  geom_text(x = .5*1 + .3*3 + .1, y = .6, label = "E[X]") + 
+  labs(x = "x", y = "f(x)")
+```
+
+
+
+## Expectation vs average {.smaller}
+
+You know about taking the **average** or **mean** of a set of numbers $x_1, x_2, \ldots, x_n$: 
+
+$$ \overline{x} = \frac{1}{n} \sum_{i = 1}^n x_i $$
+
+Just as a probability is a long-run frequency, an expectation is a long-run average.  
+
+. . .
+
+- $E[X]$ summarizes a random variable $X$; $\overline{x}$ summarizes a set of numbers
+- if each $x_i$ is an **independent sample** from $X$, $\overline{x}$ approximates $E[X]$ [(more closely with larger samples)]{.gray}
+- if each $x \in \text{Supp}[X]$ appears in the sample with frequency *exactly* $f(x)$, then $\overline{x} = E[X]$
+
+
+
+## Expectation vs average (2) {.smaller}
+
+Given PMF:
+
+$$
+f(x) = \begin{cases}
+.2 & x = 0 \\\
+.5 & x = 1 \\\
+.3 & x = 3 \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+Then $E[X] = 0 \times .2 + 1 \times .5 + 3 \times .3 = 1.4$.
+
+. . .
+
+Alternative method: make a vector of length $n$ where each $x$ appears $n f(x)$ times: 
+
+```{r, echo =T}
+x <- c(0, 0, 1, 1, 1, 1, 1, 3, 3, 3)
+# alternative way: x <- c(rep(0, 2), rep(1, 5), rep(3, 3))
+mean(x)
+```
+
+. . .
+
+Why does this work? 
+
+## Expectation vs average (3) 
+
+If each unique $x$ appears $n f(x)$ times, then
+
+$$\begin{aligned} \overbrace{\frac{1}{n} \sum_i x_i}^{\text{Average}} &= \frac{1}{n} \sum_x x   n f(x)  \\
+&= \frac{n}{n} \sum_x x  f(x) = E[X] \end{aligned}$$
+
+. . .
+
+May clarify why, in any given sample, $\overline{x} \neq E[X]$.
+
+
+
+## The continuous case 
+
+For continuous R.V. $X$, 
+
+$$ E[X] = \int_{-\infty}^{\infty} x f(x) dx $$ 
+
+. . .
+
+```{r}
+#| fig-width: 5
+#| fig-height: 3.5
+#| fig-align: center
+xs <- seq(-.5, 2, by =.01)
+ys <- dnorm(xs)
+
+# get expectation numerically -- two options
+
+# weighted sum of xs in my sequence
+ex1 <- sum(xs*ys)/sum(ys)
+
+# average of a sample
+x_samp0 <- rnorm(100000)
+x_samp <- x_samp0[x_samp0 > -.5 & x_samp0 < 2]
+ex2 <- mean(x_samp)
+
+# plot it
+tibble(x = c(-.5, xs, 2), y = c(0, ys, 0)) |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_polygon(fill = "darkgray") + 
+  theme_bw() + 
+  geom_vline(xintercept = ex1, col = "red") 
+```
+
+
+
+<!-- Just convey idea that balance will still work, we won't be doing integration.-->
+
+<!-- And we will stick to the discrete case as much as possible.--> 
+
+<!--
+## Expectation of a function of an R.V. (Theorem 2.1.5) {.smaller}
+
+Let $g(X)$ be a function of discrete RV $X$. It is a random variable with PMF $f(g(X))$. 
+
+
+Then $$ E[g(X)] = \sum_{x \in \text{Supp}(X)} g(x) f(g(x)) = \sum_{x \in \text{Supp}(X)} g(x) f(x)$$
+
+The second equality works because $f(g(x)) = f(x)$. 
+
+For example, if $g(x) = 3X$, then $\Pr[g(X) = 3] = \Pr[X = 1]$.
+-->
+<!-- is this worth telling them? yes because of MSE coming up next -->
+<!-- isn't this not quite right -- e.g. if g(X) = x^2, then \Pr[g(X) = 1] = \Pr[X = 1] + \Pr[X = -1]-->
+<!-- some confusion about big X little x -->
+
+## $E[X]$ as a "good guess" {.smaller}
+
+For R.V. $X$, consider $(X - c)^2$ for some constant $c$. [(A function of a random variable.)]{.gray}
+
+. . .
+
+Define **mean squared error** of $X$ about $c$ as $E[(X - c)^2]$.
+
+. . .
+
+For $c=1$, we have:
+
+| $x$  | $f(x)$ | $(x - 1)^2$ | 
+|------|:------------:|:------:|  
+|   0   |   .2     |  1 |  
+|   1   |     .5    |  0 |  
+| 3 |   .3  |  4 | 
+
+. . .
+
+So MSE of $X$ about $1$ is: 
+
+$$
+.2 \times 1 + .5 \times 0 + .3 \times 4 = 2.2 
+$$
+
+. . .
+
+$E[X]$ is the choice of $c$ that minimizes MSE. (Wait for proof.)
+
+
+
+
+## Bonus: $E[X]$ as X's center of mass  {.smaller}
+
+Suppose we place a weight $f(x)$ at each value $x \in \text{Supp}(X)$ along a weightless rod.
+
+. . .
+
+Where is the **center of mass**, i.e. point where  rod balances?
+
+. . .
+
+It is the point $c$ where $\sum_x (x - c) f(x) = 0$.
+
+. . .
+
+That point is $E[X]$.
+
+. . .
+
+**Proof**:
+
+$$\begin{aligned} \sum_x (x - E[X]) f(x) &= \sum_x \left( x f(x) - E[X] f(x) \right) \\
+&= \sum_x x f(x) -  \sum_x E[X] f(x) \\
+ &= E[X] - E[X] \sum_x f(x) \\
+ &= E[X] - E[X] \\
+ &= 0
+\end{aligned}$$
+
+
+
+## Expectation of a function of two RVs {.smaller}
+
+Consider this joint PMF $f(x, y)$ for $X$ and $Y$ [(e.g. state 1 militarizes, state 2 militarizes)]{.gray}
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+| $x$ | $y$ | $f(x,y)$
+|-----|----|:------------:|  
+|   0   | 0 |     1/10     |  
+|   0   | 1 |    1/5 | 
+|  1 | 0 |    1/5 | 
+| 1 |  1 |   1/2 |
+
+:::
+
+:::{.column width="50%"}
+
+$$
+f(x,y) = \begin{cases}
+1/10 & x = 0, y = 0 \\\
+1/5 & x = 0, y = 1 \\\
+1/5 & x = 1, y = 0 \\\
+1/2 & x = 1, y = 1 \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+:::
+::::
+. . . 
+
+What is $E[XY]$? [(will need e.g. for covariance)]{.gray}
+
+. . .
+
+
+$$\begin{aligned}
+E[XY] &\equiv \sum_x \sum_y xy f(x, y) \\
+&= 0 \times 1/10 + 0 \times 1/5 + 0 \times 1/5 + 1 \times 1/2 \\
+ &= 1/2 
+\end{aligned}$$
+
+
+## Linearity of expectations  {.smaller}
+
+Let $X$ and $Y$ be RVs. Then $\forall a, b, c \in \mathbb{R}$, $E[aX + bY + c] = aE[X] + bE[Y] + c$
+
+. . . 
+
+Proof (discrete case): 
+
+$$\begin{align}
+E[aX + bY + c] &= \sum_x \sum_y (ax + by + c) f(x,y) \\
+&= \sum_x \sum_y ax f(x,y) +  \sum_x \sum_y by f(x,y) + \sum_x \sum_y c f(x,y) \\
+&= a \sum_x \sum_y x f(x,y) +  b \sum_x \sum_y y f(x,y) + c \sum_x \sum_y f(x,y) \\
+&= a \sum_x x \sum_y f(x,y) +  b \sum_y y \sum_x f(x,y) + c \sum_x \sum_y f(x,y) \\
+&= a \sum_x x f_X(x) +  b \sum_y y f_Y(y) + c \sum_x f_X(x)\\
+&= a E[X] +  b E[Y] + c 
+\end{align}$$
+
+
+
+## Example of code interpretation  {.smaller}
+
+Consider this code: 
+
+```{r}
+#| eval: false
+#| echo: true
+samp <- sample(x = c("a", "b", "c"), 
+               size = 1000, 
+               replace = T, 
+               prob = c(.1, .3, .6))
+## R help file says: 
+# sample takes a sample of the specified size from the elements of x either with or without replacement.
+## function arguments: 
+# x: either a vector of one or more elements from which to choose, or a positive integer. 
+# size: a non-negative integer giving the number of items to choose.
+# replace: should sampling be with replacement?
+# prob: a vector of probability weights for obtaining the elements of the vector being sampled.
+tens <- rep(10, 1000)
+```
+
+What would the output of `mean(samp == "a")` be (approximately)?
+
+. . .
+
+**Answer**: It should be about .1, the probability of drawing an "a".
+
+. . . 
+
+What would the output of `sum(tens[samp == "b"])` be (approximately)?
+
+. . . 
+
+**Answer**: It should be about $10 \times 300 = 3000$. (About 300 of the entries in `samp` should be "b", so `tens[samp == "b]` should be a vector of about 300 10s, and the sum of this should be about 3000.) 
+
+
+
+# Variance {background-image="assets/variants2.png" background-size="cover" background-repeat="repeat"}
+
+## Variance: definition and example {.smaller}
+
+$$V[X] \equiv E[(X - E[X])^2]$$
+
+. . .
+
+::::{.columns}
+
+:::{.column width="50%}
+For Bernoulli RV [($x=1$ means heads, revolution?)]{.gray}: 
+
+$$
+f(x) = \begin{cases}
+1- p & x = 0 \\\
+p & x = 1 \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+:::
+
+
+:::{.column width="50%}
+
+We can compute $(X - E[X])^2$ at each $x$:
+
+| $x$ | $f(x)$ | $(x - E[X])^2$|
+|-----|:----:|:---:|  
+|   0   | $1-p$ | $p^2$ |
+|   1   | $p$ |  $1 - 2p + p^2$ |
+
+:::
+::::
+
+. . .
+
+And then variance as $E[(X - E[X])^2]$:
+
+$$\begin{aligned}
+V[X] &= E[(x - E[X])^2] \\ &= p^2(1-p) + (1 - 2p + p^2)p \\ &= p^2 - p^3 + p - 2p^2 + p^3 \\ &= p(1 - p)\end{aligned}$$
+
+## Graphical example
+
+```{r expectationcase}
+```
+
+## Variance: alternative formulation {.smaller}
+
+
+Bernoulli example again: 
+
+$$
+f(x) = \begin{cases}
+1- p & x = 0 \\\
+p & x = 1 \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+. . . 
+
+Alternative formulation for variance: 
+
+$$V[X] = E[X^2] - E[X]^2$$
+
+. . .
+
+What is $E[X]$? What is $E[X^2]$?   
+
+. . .
+
+By this alternative formula, we then have 
+
+$$V[X] = p - p^2 = p(1-p)$$
+
+## Proof that $V[X] = E[X^2] - E[X]^2$
+
+$$\begin{align}
+V[X] &= E\left[(X - E[X])^2\right] \\
+&= E\left[X^2 - \color{blue}{2E[X]} X + E[X]^2\right] \\
+&= E[X^2] - E\left[\color{blue}{2E[X]} X\right] + E\left[E[X]^2\right] \\
+&= E[X^2] - \color{blue}{2E[X]} E[X] + E[X]^2 \\ 
+&= E[X^2] - 2 E[X]^2 + E[X]^2 \\ 
+&= E[X^2] - E[X]^2
+\end{align}$$
+
+
+## Properties of variance {.smaller}
+
+For a random variable $X$,
+
+- $\forall c \in \mathbb{R}$, $V[X + c] = V[X]$
+- $\forall a \in \mathbb{R}$, $V[aX] = a^2V[X]$
+
+. . . 
+
+Proof of second point: 
+
+$$\begin{align}
+V[aX] &= E\left[(aX - E[aX])^2\right] \\
+&= E\left[(aX - aE[X])^2\right] \\
+&= E\left[a^2(X - E[X])^2\right] \\
+&= a^2 E\left[(X - E[X])^2\right] \\
+&= a^2 V[X]
+\end{align}$$
+
+## Standard deviation
+
+Standard deviation:
+
+$$\sigma[X] = \sqrt{V[X]}$$
+
+Roughly, "how far does $X$ tend to be from its mean"? 
+
+```{r, eval = F}
+library(tidyverse)
+tibble(p = seq(0, 1, length = 1000)) |> 
+  mutate(va = p*(1-p),
+         sd = sqrt(va),
+         mean_dev = 2*p*(1-p)) |> 
+  pivot_longer(cols = -p) |> 
+  ggplot(aes(x = p, y = value, col = name)) + 
+  geom_line()
+
+```
+
+## Revisiting justification for $E[X]$ 
+
+Alternative formula for MSE:
+
+$$\begin{align}
+E[(X - c)^2] &= E\left[X^2 - 2cX + c^2\right] \\
+&= E[X^2] - 2cE[X] + c^2 \\
+&= E[X^2] - \color{red}{E[X]^2} + \color{green}{E[X]^2} - 2cE[X] + c^2 \\
+&= \left(E[X^2] - \color{red}{E[X]^2}\right) + \left(\color{green}{E[X]^2} - 2cE[X] + c^2\right) \\
+&= V[X]  + \left(E[X] - c\right)^2
+\end{align}$$
+
+. . . 
+
+So what $c$ should you choose to minimize MSE?
+
+
+
+## Parametric distributions
+
+Given any RV $X$ with associated PMF/PDF or CDF, we can compute $E[X]$ and $V[X]$.
+
+. . .
+
+For special types of RV, these parameters *define* the distribution:
+
+- Bernoulli distribution identified by $E[X]$ ($p$)
+- Normal distribution identified by $E[X]$, $V[X]$ ($\mu$, $\sigma^2$)
+
+. . . 
+
+But don't get confused: any RV has $E[X]$ and $V[X]$, not just these special ones.
+
+
+## Other things not to get confused about
+
+Sometimes "mean" means $E[X]$ (e.g. *mean squared error* or $\mu$ of a normal distribution), sometimes it means "sample mean" or "average" of some numbers (e.g. `mean(c(2,4,6))`). 
+
+Sometimes "variance" means $V[X]$, sometimes it means "sample variance" (e.g. `var(c(2,4,6))`).
+
+. . . 
+
+There is a close relationship, but remember that 
+
+- $E[X]$ and $V[X]$ are **operators** that convert a **distribution** (PMF, PDF, CDF) into a number, and 
+- `mean()` and `var()` are **`R` functions** that convert a **vector of numbers** (e.g. a sample) into a number. 
+
+
+<!-- TODO: week 4's lectures should have CEF, BLP, etc, which I think I did later last year --> 
+<!-- consider last year's TODO: add something comparing MSE to mean deviation and MAD
+I think the idea was that I said something like, "If we use some other standard than MSE, we don't get the mean". And it would be nice to show that. --> 
+<!-- maybe some coding exercise or coaching, but I think it's enough actually -->
+<!-- --> 

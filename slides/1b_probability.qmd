@@ -1,0 +1,818 @@
+---
+title: "PLSC30500, Fall 2023"
+subtitle: "Part 1. Probability Theory (part b)"
+author: "Andy Eggers"
+format: 
+  revealjs:
+    smaller: false
+    slide-number: c/t
+    css: ["default", "uchicago_pol_meth.css"]
+    theme: simple
+    echo: false
+    embed-resources: true
+
+---
+
+<!-- this seems too short. Is there something I can add? Marginal PDF in the continuous case. something about multivariate generalizations. I can add this tomorrow. --> 
+
+```{r}
+#| warning: false
+#| message: false
+
+library(tidyverse)
+knitr::opts_chunk$set(dev = "ragg_png")
+```
+
+
+
+# Random variables 
+
+![](assets/rv_there_yet.png){width=80% fig-align="center"}
+
+
+## Random variables 
+
+Recall a random generative process produces an outcome $\omega \in \Omega$; events (e.g. $A$, $B$) are sets of outcomes. 
+
+. . . 
+
+A random variable $X$ is a function that maps each outcome $\omega$ to an event expressed as a number. ["Random variables are real-valued functions of outcomes" (A&M p. 38)]{.gray}
+
+. . . 
+
+e.g. $X(\omega) = 1$ means that the outcome $\omega$ is part of the event 1.
+
+. . . 
+
+Usually we just write $X = 1$ and $\text{Pr}[X = 1]$. [(cf $P(A)$ for events)]{.gray}
+
+. . .
+
+[Can also think of $X$ as a random process that produces numbers as outcomes, but A&M's way distinguishes the random process itself from the researcher's representation of it in numbers.]{style="font-size: 50%; line-height: 10%"}
+
+
+## Random variables: Blitzstein and Hwang figure
+
+![](assets/blitzstein_hwang_rv_fig.png){width=80% fig-align="center"}
+
+
+## Random variables: another Blitzstein and Hwang figure
+
+![](assets/blitzstein_hwang_fig_2.png){width=80% fig-align="center"}
+
+"Two random variables defined on the same sample space"
+
+
+## Why though?
+
+If the events of interest can be quantified, then 
+
+- $X$ is a random variable indicating e.g. the number of successes
+
+This is much easier to work with than 
+
+- $A$ is the event that there are 0 successes, $B$ that there are 1 successes, \ldots
+
+
+<!-- so probability does not require events to be quantifiable, but when they are this is a lot easier --> 
+
+. . . 
+
+Blitzstein and Hwang: "Random variables provide *numerical* summaries of the experiment in question."
+
+
+## Functions/operators of random variables 
+
+Since a random variable $X$ produces numbers, we can apply **functions**: e.g. $X^2$, $\sqrt{X}$, generically $g(X)$
+
+This gives us a new number for each $\omega$ -- a new random variable. 
+
+<br>
+
+. . .
+
+We also want to describe a random variable using **operators**: e.g. $E[X]$ (**expectation**), $V[X]$ (**variance**). 
+
+This gives us a number to describe $X$ -- **not** a new random variable. [(We may *estimate* these from samples, producing RVs, e.g. **sample mean**, **sample variance**.)]{.gray}
+
+
+## Blitzstein and Hwang figure
+
+![](assets/blitzstein_hwang_gX_fig.png){width=80% fig-align="center"}
+
+
+## Discrete random variables and the PMF 
+
+A random variable $X$ is **discrete** if its range $X(\Omega)$ is a **countable set**. For example, $\{1,2,3\}$, $\{1,2,3, \ldots\}.$
+
+. . .
+
+A discrete RV has a **probability mass function** (PMF): $$f(x) = \text{Pr}[X = x], \forall x \in \mathbb{R}.$$
+
+. . .
+
+For example, the number of heads in two flips of a fair coin:
+
+$$
+f(x) = \begin{cases}
+1/4 & x = 0 \\\
+1/2 & x = 1 \\\
+1/4 & x = 2 \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+## The CDF 
+
+The **cumulative distribution function** (CDF) of a random variable $X$ is 
+
+$$ F(x) = \text{Pr}[X \leq x], \forall x \in \mathbb{R}$$
+The CDF is another way to fully describe a random variable.
+
+. . .
+
+For the coin flip example, 
+
+$$
+F(x) = \begin{cases}
+0 & x < 0 \\\
+1/4 & 0 \le x < 1 \\\
+3/4 & 1 \le x < 2 \\\
+1 & x \ge 2
+\end{cases}
+$$
+
+## The PMF and CDF for number of heads in two coinflips
+
+```{r}
+#| echo: false
+plotdata <- tibble(
+  x = c(-1, 0, 1, 2),
+  xend = c(0, 1, 2, 3),
+  `f(x)` = c(0, 1/4, 1/2, 1/4),
+  `F(x)` = cumsum(`f(x)`)
+)
+```
+
+:::: {.columns}
+
+:::{.column width="50%"}
+```{r coinflip_plotCDF}
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| echo: false
+ggplot(plotdata, aes(x = x, y = `f(x)`)) +
+  geom_point() +
+  coord_cartesian(xlim = c(-0.5, 2.5),
+                  ylim = c(0,1)) +
+  geom_segment(aes(x = x, y = c(0,0,0,0), xend = x, yend = `f(x)`)) +
+  labs(title = 'PMF of X (number of heads in 2 fair coin flips)',
+       x = "x (number of heads)")
+```
+:::
+
+:::{.column width="50%"}
+```{r coinflip_plotPMF}
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| echo: false
+ggplot(plotdata, aes(x = x, y = `F(x)`)) +
+  geom_segment(aes(x = x, y = `F(x)`, xend = xend, yend = `F(x)`)) + 
+  geom_point() +
+  geom_point(aes(x = xend, y = `F(x)`), shape= 21, fill = 'white') +
+  coord_cartesian(xlim = c(-0.5, 2.5),
+                  ylim = c(0,1)) +
+  labs(title = 'CDF of X (number of heads in 2 fair coin flips)',
+       x = "x (number of heads)")
+```
+:::
+
+::::
+
+
+## Continuous random variables 
+
+If a random variable could take on a **continuum** of values [(i.e. $X(\Omega)$ includes some interval of the real line)]{.gray}, then we say it is **continuous**.
+
+. . . 
+
+
+```{r}
+#| echo: false
+norm_plotdata <- tibble(x = seq(-4, 4, by = .01)) |> 
+  mutate(`f(x)` = dnorm(x),
+         `F(x)` = pnorm(x))
+```
+
+:::: {.columns}
+
+:::{.column width="50%"}
+```{r norm_plotPMF}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-align: center
+#| echo: false
+ggplot(norm_plotdata, aes(x = x, y = `f(x)`)) +
+  geom_line() +
+  labs(title = 'PDF of X',
+       x = "x")
+```
+:::
+
+:::{.column width="50%"}
+```{r norm_plotCDF}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-align: center
+#| echo: false
+ggplot(norm_plotdata, aes(x = x, y = `F(x)`)) +
+  geom_line() +
+  labs(title = 'CDF of X',
+       x = "x")
+```
+:::
+
+::::
+
+
+## Integrating PDF to get probability of event in interval 
+
+Probability **density** function (PDF) written $f(x)$, CDF written $F(x)$.
+
+. . .
+
+CDF is integral of PDF below $x$: 
+
+$$F(x) = \text{Pr}[X \leq x] = \int_{-\infty}^x f(u) du$$
+
+. . .
+
+$$\text{Pr}[a \leq X \leq b] = \int_{a}^b f(u) du = F(b) - F(a)$$
+
+## Integration visually 
+
+```{r}
+#| echo: false
+integration_data <- tibble(x = c(norm_plotdata$x, rev(norm_plotdata$x)),
+                           `f(x)` = c(norm_plotdata$`f(x)`, rep(0, nrow(norm_plotdata))))
+```
+
+
+:::: {.columns}
+
+:::{.column width="50%"}
+```{r norm_plot_CDFintegral}
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| echo: false
+
+a <- -.6
+ggplot(norm_plotdata, aes(x = x, y = `f(x)`)) +
+  geom_line() +
+  geom_polygon(data = integration_data |> filter(x < a),
+               fill = "lightblue", alpha = .5) +
+  geom_line(data = tibble(x = c(a, a), `f(x)` = c(0, dnorm(a)))) + 
+  labs(main = 'PDF of X',
+       x = "x") + 
+  scale_x_continuous(breaks = c(-4, -2, a, 0, 2, 4), labels = c(-4, -2, "a", 0, 2, 4))
+```
+:::
+
+:::{.column width="50%"}
+```{r norm_plot_interval_integral}
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| echo: false
+a <- -.9
+b <- .6
+ggplot(norm_plotdata, aes(x = x, y = `f(x)`)) +
+  geom_line() +
+  geom_polygon(data = integration_data |> filter(x < b & x > a),
+               fill = "lightblue", alpha = .5) +
+  geom_line(data = tibble(x = c(a, a), `f(x)` = c(0, dnorm(a)))) + 
+  geom_line(data = tibble(x = c(b, b), `f(x)` = c(0, dnorm(b)))) + 
+  labs(main = 'CDF of X',
+       x = "x") + 
+  scale_x_continuous(breaks = c(-4, -2, a, 0, b, 2, 4), labels = c(-4, -2, "a", 0, "b", 2, 4))
+```
+:::
+
+::::
+
+
+## Uniform random variable 
+
+
+```{r}
+#| echo: false
+unif_plotdata <- tibble(x = seq(-.5, 1.5, by = .01)) |> 
+  mutate(`f(x)` = dunif(x),
+         `F(x)` = punif(x))
+```
+
+:::: {.columns}
+
+:::{.column width="50%"}
+```{r unif_plotPMF}
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| echo: false
+ggplot(unif_plotdata, aes(x = x, y = `f(x)`)) +
+  geom_line() +
+  labs(title = 'PDF of X',
+       x = "x")
+```
+:::
+
+:::{.column width="50%"}
+```{r unif_plotCDF}
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| echo: false
+ggplot(unif_plotdata, aes(x = x, y = `F(x)`)) +
+  geom_line() +
+  labs(title = 'CDF of X',
+       x = "x")
+```
+:::
+
+::::
+
+
+
+
+## Bivariate relationships
+
+We might have two random variables -- e.g. flip a coin and draw a ball from an urn.
+
+. . . 
+
+Or, in a data analysis problem we could view two characteristics as random variables, e.g. 
+
+- age of respondent and whether or not respondent voted
+- GDP of country and how democratic it is
+
+
+## Describing bivariate relationships
+
+We can describe two random variables $X$ and $Y$ with 
+
+- **joint PMF**: 
+
+$$
+f(x,y) = \textrm{P}[X=x, Y=y], \forall x, y \in \mathbb{R}
+$$
+
+- **joint CDF**:
+
+$$
+F(x,y) = \textrm{P}[X \leq x, Y \leq y], \forall x, y \in \mathbb{R}
+$$
+
+
+
+## Writing the PMF: table format
+
+Let $X$ denote number of heads in **two** tosses of a fair coin.
+
+Let $Y$ denote number of heads in **one** toss of a fair coin.
+
+```{r}
+tibble(x = c(0, 0, 1, 1, 2, 2), y = rep(c(0, 1), 3), `Pr[X = x, Y = y]` = c("1/8", "1/8", "1/4", "1/4", "1/8", "1/8")) |> 
+  kableExtra::kbl(booktabs = T)
+```
+
+
+## Writing a PMF: "cases" format
+
+Let $X$ denote number of heads in **two** tosses of a fair coin.
+
+Let $Y$ denote number of heads in **one** toss of a fair coin.
+
+
+$$
+f(x, y) = \begin{cases} 
+1/8 & x = 0, y = 0 \\\
+1/8 & x = 0, y = 1 \\\
+1/4 & x = 1, y = 0 \\\
+1/4 & x = 1, y = 1 \\\
+1/8 & x = 2, y = 0 \\\
+1/8 & x = 2, y = 1 \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+
+## Writing a joint PMF: "$X$-by-$Y$" format
+
+Let $X$ denote number of heads in **two** tosses of a fair coin.
+
+Let $Y$ denote number of heads in **one** toss of a fair coin.
+
+Then $\text{Pr}[X = x, Y = y]$ is given by this table: 
+
+
+```{r plainjoint}
+#| echo: false
+
+tib <- tibble(X = c("x = 0", "x = 1", "x = 2"), 
+              `Y0` = c("1/8", "1/4", "1/8"), 
+              `Y1` = c("1/8", "1/4", "1/8"))
+kableExtra::kbl(tib, col.names = c("", "y = 0", "y = 1"), booktabs = T) |> 
+  kableExtra::column_spec(1,border_right = T) |> 
+  kableExtra::column_spec(1,bold = T) |> 
+  kableExtra::row_spec(1, extra_css = "border-top: 1px solid")
+```
+
+
+## Graphical representation of joint PMF
+
+```{r rglpmf, webgl = T}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+
+library(rgl)
+setupKnitr(autoprint = TRUE)
+
+dat <- tribble(~x, ~y, ~z,
+        -1, -1, 0,
+        3, 2, 0,
+        0, 0, 1/8,
+        0, 1, 1/8,
+        1, 0, 1/4,
+        1, 1, 1/4,
+        2, 0, 1/8,
+        2,1, 1/8)
+
+# Initialize the 3D plot
+open3d()
+
+aspect3d(x=3, y=3 , z =30)
+
+# par3d(windowRect = c(20, 30, 800, 800))
+
+# Create the 3D plot with lines
+for (i in 1:nrow(dat)) {
+  points3d(x = dat$x[i], y = dat$y[i], z = dat$z[i])
+  segments3d(
+    x = rep(dat$x[i], 2),
+    y = rep(dat$y[i], 2),
+    z = c(0, dat$z[i]),
+    col = "blue",  # You can choose your desired color
+    lwd = 2        # Adjust the line width as needed
+  )
+}
+
+# Set axis labels
+axes3d("bbox")
+title3d(xlab = "x", ylab = "y", zlab = "f(x,y)")
+
+rgl.close()
+
+```
+
+## Marginal PMF 
+
+Recall: A joint PMF $f(x, y) = \text{Pr}[X = x, Y = y]$ describes the distribution of two discrete RVs $X$ and $Y$.
+
+. . .
+
+We can also talk about the **marginal PMF** of one of the variables: 
+
+$$f_Y(y) = \text{Pr}[Y = y] = \sum_{x \in \text{Supp}[X]} f(x, y), \forall y \in \mathbb{R}.$$
+
+Basically, this describes the distribution of $Y$ ignoring $X$.
+
+This is an application of the Law of Total Probability.
+
+
+
+## Marginal PMF (2)
+
+With the $X$-by-$Y$ representation of joint PMF, the marginal PMF of $X$ is the row sums, marginal PMF of $Y$ is column sums (written in the *margins*): 
+
+```{r}
+#| echo: false
+
+tib |> 
+  mutate(rowsum = c("1/4", "1/2", "1/4")) |> 
+  bind_rows(tibble(X = "", Y0 = "1/2", Y1 = "1/2", rowsum = ""))  -> expanded_tib
+
+expanded_tib |>
+  kableExtra::kbl(col.names = c("", "y = 0", "y = 1", " "), booktabs = T) |> 
+  kableExtra::column_spec(c(1,3),border_right = T) |>
+  kableExtra::column_spec(1,bold = T) |> 
+  kableExtra::row_spec(1, extra_css = "border-top: 1px solid") |> 
+  kableExtra::row_spec(4, extra_css = "border-top: 1px solid")
+```
+
+<!-- Plan: finish probability slides --> 
+<!-- Think about problems for problem set -- starting writing it (must be done by tomorrow) -->
+<!-- EOD: finish syllabus, publish canvas -->  
+
+
+## Marginal PMF (3)
+
+With the graphical representation, think about *sweeping the mass to the axis*:
+
+
+```{r rglpmf, webgl = T}
+#| output: false
+```
+
+## Conditional PMF
+
+For RVs $X$ and $Y$, we can also talk about the **conditional PMF** of $Y$ at a value of $X$: 
+
+$$f_{Y|X}(y|x) = \text{Pr}[Y = y \mid X = x] = \frac{\text{Pr}[X = x, Y = y]}{\text{Pr}[X = x]} = \frac{f(x, y)}{f_X(x)}$$
+$\forall y \in \mathbb{R}$ and $\forall x \in \text{Supp}[X]$.
+
+. . .
+
+- Just like conditional probability for events
+- Intuitively, take the joint probabilities where $X = x$ and scale them up by $\text{Pr}[X = x]$
+
+
+
+## Conditional PMF (2)
+
+With the $X$-by-$Y$ representation of joint PMF, you get the conditional PMF of $Y$ given $X = x$ by dividing each row by the row sum (i.e. the marginal probability of $X = x$): 
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+$f(x, y)$
+
+```{r plainjoint}
+```
+
+:::
+
+::: {.column width="50%"}
+
+[$f_{Y|X}(y |x )$]{style="text-align: center;"}
+
+```{r}
+#| echo: false
+tibble(X = str_c("x = ", c(0, 1, 2)),
+       Y0 = c("1/2", "1/2", "1/2"),
+       Y1 = c("1/2", "1/2", "1/2")) |>
+  kableExtra::kbl(col.names = c("", "y = 0", "y = 1"), booktabs = T) |> 
+  kableExtra::column_spec(1,bold = T, border_right = T) |> 
+  kableExtra::row_spec(1, extra_css = "border-top: 1px solid")
+```
+
+
+:::
+
+::::
+
+
+<!-- Plan: finish probability slides --> 
+<!-- Think about problems for problem set -- starting writing it (must be done by tomorrow) -->
+<!-- EOD: finish syllabus, publish canvas -->  
+
+
+## Conditional PMF (3)
+
+With the graphical representation, think about *taking a slice of the PMF and rescaling it*:
+
+
+```{r rglpmf, webgl = T}
+#| output: false
+```
+
+
+
+
+
+```{r}
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(rgl)
+setupKnitr(autoprint = TRUE)
+```
+
+## Jointly continuous random variables
+
+<!-- plan: get some code to make the RGL surface for a distribution for which I can compute the marginal and conditional -->
+
+Joint *probability density function* (PDF): 
+
+```{r mvrnorm, webgl = T}
+#| message: false
+#| output: false
+
+dat <- expand_grid(x = seq(-10, 10, length = 300),
+                   y = seq(-10, 10, length = 300))
+
+dat |> 
+  mutate(z = mvtnorm::dmvnorm(as.matrix(dat))) -> datt
+         
+open3d()
+
+plot3d(datt, col = "lightblue", alpha = .5, 
+       xlab = "x", ylab = "y", zlab = "f(x, y)", 
+       xlim = c(-3, 3), ylim = c(-3, 3),
+       aspect = c(1, 1, .5))
+
+rgl.close()
+```
+
+
+## Jointly continuous random variables (2)
+
+Another joint PDF: 
+
+```{r mvrridge, webgl = T}
+#| message: false
+#| output: false
+
+Sigma <- cbind(c(1, .7), c(.7, 1))
+dat |> 
+  mutate(z = mvtnorm::dmvnorm(as.matrix(dat), sigma = Sigma)) -> datt2
+         
+open3d()
+
+plot3d(datt2, col = "lightblue", alpha = .5, 
+       xlab = "x", ylab = "y", zlab = "f(x, y)", 
+       xlim = c(-3, 3), ylim = c(-3, 3),
+       aspect = c(1, 1, .5))
+
+rgl.close()
+```
+
+
+## Marginal PDF in the continuous case
+
+
+$$f_Y(y) = \int_{-\infty}^{\infty}f(x,y) dx, \forall y \in \mathbb{R}$$
+
+To get $f_Y(y)$ for a specific $y$, slice the joint pdf at $Y = y$, and integrate (sum) $f(x, y)$ across all values of $x$. 
+
+To get $f_Y(y)$ for all $y$s, think about squishing the PDF into the $y$-axis. 
+
+
+
+## Conditional PDF in the continuous case
+
+
+$$f_{Y \mid X}(y \mid x) = \frac{f(x,y)}{f(x)}, \forall y \in \mathbb{R} \, \text{and} \, \forall x \in \mathrm{Supp}[X]$$
+
+```{r}
+#| message: false
+#| output: false
+
+open3d()
+
+plot3d(datt2, col = "lightblue", alpha = .5, 
+       xlab = "x", ylab = "y", zlab = "f(x, y)", 
+       xlim = c(-3, 3), ylim = c(-3, 3),
+       aspect = c(1, 1, .5))
+
+rgl.close()
+```
+
+For a specific $x$, what does $f(x,y)$ look like? What does $f(x)$ look like? 
+
+
+
+
+## Conditional PDF (2) {.smaller}
+
+$f(x, y)$ for $x=1$ is the intersection between the joint pdf and the plane $x = 1$: 
+
+```{r}
+#| message: false
+#| output: false
+
+open3d()
+
+plot3d(datt2, col = "lightblue", alpha = .5, 
+       xlab = "x", ylab = "y", zlab = "f(x, y)", 
+       xlim = c(-3, 3), ylim = c(-3, 3),
+       aspect = c(1, 1, .5))
+planes3d(a = 1, b = 0, c = 0, d = -1, col = "red", alpha = .5)
+
+n <- 100
+y <- seq(-3, 3, length = n)
+x <- rep(1, length(y))
+z <- mvtnorm::dmvnorm(cbind(x, y), sigma = Sigma)
+lines3d(x = x, y = y, z = z, col = "black", lwd = 2)
+
+rgl.close()
+
+# numerically compute integral:
+fx <- sum(z)*(y[2] - y[1])
+
+```
+
+And $f(x)$ is the integral of that intersection: numerically I compute it to be about `r round(fx, 2)`.
+
+## Conditional PDF (3)
+
+```{r}
+tibble(y = y,
+       `f(x, y) at x=2 (joint)` = z,
+       `f(y | x = 2) (conditional)` = z/fx) |> 
+  pivot_longer(-y) |> 
+  ggplot(aes(x = y, y = value, col = name)) + 
+  geom_line() + 
+  labs(y = "", col = "") + 
+  scale_color_manual(values = c("black", "turquoise"))
+
+```
+
+## Conditional PDF (4)
+
+Above is $f_{Y \mid X} (y \mid x)$ for one value of $x$. Here it is for all $x$:
+
+
+```{r}
+#| message: false
+#| output: false
+
+# fix this by using a bigger range for x and y and clipping it.
+datt2 |> 
+  group_by(x) |> 
+  mutate(z = z/sum(z)) |> 
+  ungroup() -> datt2_conditional
+
+open3d()
+
+plot3d(datt2_conditional, col = "lightblue", alpha = .5, 
+       xlab = "x", ylab = "y", zlab = "f(y | x)", 
+       xlim = c(-3, 3), ylim = c(-3, 3),
+       aspect = c(1, 1, .5))
+
+rgl.close()
+
+```
+
+## Conditional PDF (5) {.smaller}
+
+::::{.columns}
+Questions that are best answered with  
+
+:::{.column width="50%"}
+Joint dist. $f(x,y)$:
+
+- how common are tall, smart people?
+- in a particular industry, are there more women CEOs or men CEOs? 
+- what proportion of crimes are committed by young women?
+:::
+
+:::{.column width="50%"}
+
+Conditional dist. $f_{Y|X}(y | x)$:
+
+- how smart are tall people? how tall are smart people?
+- in a particular industry, is the proportion of women who are CEOs higher than the proportion of men who are CEOs?
+- of crimes committed by women, what proportion are committed by young women?
+
+:::
+::::
+
+Can be very important to distinguish between the two!
+
+
+
+## Which conditional probability? {.smaller}
+
+Researchers often get confused about which conditional probability they are handling, $\Pr[Y \mid X]$ or $\Pr[X \mid Y]$. 
+
+- $\Pr[ \text{data} \mid H_0 \textrm{ is true}]$ is (roughly) the p-value; $\Pr[ H_0 \textrm{ is true} \mid \text{data}]$ is something else
+- [Johnson et al (2019)](https://www.pnas.org/doi/10.1073/pnas.1903856116) use data on shootings to measure $$\Pr(\text{minority civilian}  \mid \text{shot, white officer, } X) - \\ \Pr(\text{minority civilian}  \mid \text{shot, minority officer, } X),$$ but (as pointed out by [Knox and Mummolo](https://www.pnas.org/doi/10.1073/pnas.1919418117)) interpret results as if it was  $$\Pr(\text{shot} \mid \text{minority civilian, white officer, } X) - \\ \Pr(\text{shot}  \mid \text{minority civilian, minority officer, } X)$$
+
+. . .
+
+$\Pr[Y \mid X]$ or $\Pr[X \mid Y]$ are connected by Bayes Rule.
+
+## Independence of random variables
+
+Random variables $X$ and $Y$ are independent if, $\forall x, y \in \mathbb{R}$:
+
+$$f(x, y) = f_X(x) f_Y(y)$$
+
+. . . 
+
+Equivalently, 
+
+$X$ and $Y$ are independent if the conditional distribution of $X$ at every $y$ is the same as the marginal distribution of $X$, i.e. if $f_{X | Y}(x | y) = f_X(x)$ $\forall x \in \mathbb{R}$ and $\forall y \in \text{Supp}[Y]$
+
+And vice versa. 
+
+
+
+
