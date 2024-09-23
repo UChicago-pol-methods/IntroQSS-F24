@@ -1,5 +1,5 @@
 ---
-title: "PLSC30500, Fall 2023"
+title: "PLSC30500, Fall 2024"
 subtitle: "Part 0. Introduction"
 author: "Andy Eggers"
 format: 
@@ -17,7 +17,7 @@ format:
 ## This course
 
 - Instructor: Andy Eggers
-- Teaching assistant: Moksha Sharma
+- Teaching assistant: John Kainer
 - part of a sequence:
   - Intro to Quant Soc Sci **(this course)** (fall)
   - Causal Inference (winter)
@@ -43,14 +43,17 @@ Five modules:
 - Regression (8.1, 8.2, 9.1, 9.2)
 
 
-## Expectations about background
+## Expectations about background {.smaller}
+
+Required to have some recent exposure to probability and `R`.
 
 Useful (not required) to have exposure to
 
-- math (semi-recently)
-- probability & statistics
+- other math (semi-recently)
+- other programming
+- statistics
 - econometrics/regression modeling
-- programming
+
 
 . . .
 
@@ -78,24 +81,24 @@ If you email me a question, I am likely to tell you to put it on our StackOverfl
 
 ## Labs 
 
-Taught by Moksha, Fridays, Cobb 301.
+Taught by John, Fridays, two sessions
 
-- Lab 1: 12:30-1:20
-- Lab 2: 1:30-2:20
+- 10:30-11:20 (Cobb 430) 
+- 12:30-1:20 (SSRB 107) 
 
 
 ## Assessment 
 
 - 40% problem sets (8 in all)
 - 10% class participation
-- 20% in-class midterm on October 19
-- 30% final take-home exam due December 5
+- 20% in-class midterm, session 4.2 (October 23) 
+- 30% final take-home exam due December 10
 
 ## Websites
 
 All slides and assignments will be distributed via the course Github:
 
-<https://github.com/UChicago-pol-methods/IntroQSS-F23>
+<https://github.com/UChicago-pol-methods/IntroQSS-F24>
 
 Download files one by one, or `git clone` and frequently update. 
 
@@ -180,7 +183,7 @@ That's it.
 
 ## What we want you to know 
 
-You need to know what is above -- at least, the correct parts! (e.g. reading regression table, interpreting interaction terms) 
+You need to know the correct parts above! (e.g. reading regression table, interpreting interaction terms) 
 
 . . .
 
