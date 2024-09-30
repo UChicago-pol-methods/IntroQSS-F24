@@ -30,6 +30,7 @@ format:
 - give a taste of what is fun about quantitative social science 
     - mathematical rigor and clarity
     - thinking about estimation, uncertainty, causality
+    - working with data (a little)
 
 
 ## Broad plan
@@ -100,7 +101,8 @@ All slides and assignments will be distributed via the course Github:
 
 <https://github.com/UChicago-pol-methods/IntroQSS-F24>
 
-Download files one by one, or `git clone` and frequently update. 
+1. Download files one by one, or 
+1. `git clone` and periodically update via `git pull`. 
 
 . . . 
 
@@ -109,11 +111,12 @@ Homework submission via Canvas page.
 
 ## Technical setup
 
-By lab on Friday (ideally sooner), make sure you do this:
+By lab on Friday (ideally sooner), make sure you have R/RStudio installed, and can compile a qmd file to pdf. 
 
 1. install `R` from https://cran.rstudio.com/ 
 1. Install RStudio from https://www.rstudio.com/products/rstudio/download/
 1. In RStudio install `tidyverse` and `tinytex`
+1. New file -> Quarto document; then `Render` to make pdf.
 
 ```{r eval = F}
 # from https://yihui.org/tinytex/:
@@ -121,9 +124,7 @@ install.packages('tinytex')
 tinytex::install_tinytex()
 ```
 
-. . . 
-
-If you can "knit" the first homework (`ps1_2023_probability.qmd`) into a PDF, you are all set.
+<!-- If you can "knit" the first homework (`ps1_2024_probability.qmd`) into a PDF, you are all set. -->
 
 <!-- If you run into trouble, use (free) RStudio Cloud until you resolve the issue. --> 
 
@@ -140,7 +141,8 @@ Most social scientists "know" a few things about
 
 . . .
 
-That's it.
+That's it. And some of what they know is wrong!
+
 
 ## What most applied social scientists "know" about linear regression (OLS) {.smaller}
 

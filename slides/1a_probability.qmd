@@ -39,6 +39,8 @@ What does this have to do with social science?
 
 Sometimes a coin flip, an urn, or a similar device actually determines which **units/observations** we see: who gets selected for a survey.
 
+. . . 
+
 The urn problems help us understand how the **sample** might differ from the **population** (and thus how certain we can be about characteristics of the population using the sample).
 
 
@@ -47,15 +49,18 @@ The urn problems help us understand how the **sample** might differ from the **p
 
 Sometimes a coin flip, an urn, or a similar device actually determines which units/observations get a random **treatment**, e.g. in a **randomized experiment** or the Vietnam draft lottery.
 
+. . . 
+
 The urn problems help us compare differences we see between treatment and control units to differences we might see by chance if the treatment had no effect.
 
 
-## Urns as metaphors
+## Sampling/Urn as a metaphor
 
+Even when there was no random selection (e.g. data on all countries) we can *act as if there was* [or act as if the dependent variable (e.g. revolution) has a random component]{.gray}. 
 
-Even when there was no random selection (e.g. data on all countries) we can *act as if there was*, or act as if the dependent variable (e.g. revolution) has a random component. 
+. . . 
 
-Then the urn problems again help us compare the "sample" to the "population", or observed reality to what might have happened in an alternate history *if we treat our ignorance as chance*.
+Pretending units (or error terms) were sampled from a population can be convenient for conveying the strength of systematic relationships relative to what we don't understand. <!--    Then the urn problems again help us compare the "sample" to the "population", or observed reality to what might have happened in an alternate history *if we treat our ignorance as chance*.--> 
 
 
 ## Probability vs statistical inference {.smaller}
@@ -145,7 +150,7 @@ Sample space $\Omega$ ("Omega") is the set of all possible outcomes of the rando
 
 . . .
 
-For a coin flip, $\Omega = \{H, T\}$; $\omega \in \{H, T\}$.
+For a coin flip, $\Omega = \{H, T\}$; $\omega \in \{H, T\}$.  <!-- note that Omega is the set; omega is an element -->
 
 . . .
 
@@ -196,9 +201,9 @@ An **event** is a collection of outcomes to which we want to assign a probabilit
 
 Examples: 
 
-- rolling a 3 [(Here, an outcome is an event)]{.gray}
-- rolling an even number
-- in an election, a tie for first between candidates $a$ and $b$
+- rolling a 3 [(a single outcome)]{.gray}
+- rolling an even number [(three outcomes outcome)]{.gray}
+- in an election, a tie for first between candidates $a$ and $b$ [(many different outcomes)]{.gray}
 
 . . .
 
@@ -223,7 +228,7 @@ A **probability measure**  is a function $P : S \rightarrow \mathbb{R}$ that ass
 - Countable additivity: if $A_1, A_2, A_3, \ldots \in S$ are **pairwise disjoint**, then 
 
 $$P(A_1 \cup A_2 \cup A_3 \cup \ldots ) = P(A_1) + P(A_2) + P(A_3) + \ldots = \sum_i P(A_i) $$
-[(for events that cannot co-occur, the probability of one of the event occurring is the sum of the individual probs)]{.dark-gray}
+[(for events that cannot co-occur, the probability of one of the events occurring is the sum of the individual probs)]{.dark-gray}
 
 
 ## Basic properties of probability
@@ -283,7 +288,7 @@ There are "rules" (e.g. addition rule) and "laws" (e.g. law of total probability
 **Addition rule**: For $A, B \in S$, 
 
 $$ P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
-Let's prove it! (Board, or book or `S`)
+Let's prove it! (Board, or book or `s`)
 
 :::{.notes}
 $A \cup B = (A \setminus (A \cap B)) \cup (B \setminus (A \cap B)) \cup (A \cap B)$
@@ -391,7 +396,7 @@ If $A_1, A_2, \ldots \in S$ is nonempty and pairwise disjoint, and $\Omega = A_1
 \end{tikzpicture}
 ```
 
-
+<!-- i.e. each outcome is part of exactly one event --> 
 
 ## Law of total probability 
 
@@ -487,7 +492,7 @@ $A \perp \!\!\! \perp B$ $\iff P(A \mid B) = P(A).$  $\,\, \blacksquare$ [(divid
 
 . . . 
 
-In subjective terms, knowing $B$ occurred does not affect our assessment of probability that $A$ occurred. 
+In subjective terms, if $A$ and $B$ are independent, then knowing $B$ occurred does not affect our assessment of probability that $A$ occurred. 
 
 
 ## Independent? 
