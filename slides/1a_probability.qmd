@@ -158,7 +158,7 @@ For a single roll of a six-sided die, $\Omega = \{1, 2, 3, 4, 5, 6\}$.
 
 . . .
 
-How about for a single roll of two six-sided die? 
+How about for a single roll of two six-sided dice? 
 
 . . . 
 
@@ -202,8 +202,8 @@ An **event** is a collection of outcomes to which we want to assign a probabilit
 Examples: 
 
 - rolling a 3 [(a single outcome)]{.gray}
-- rolling an even number [(three outcomes outcome)]{.gray}
-- in an election, a tie for first between candidates $a$ and $b$ [(many different outcomes)]{.gray}
+- rolling an even number [(three outcomes)]{.gray}
+- in election, a tie for first between candidates $a$ and $b$ [(possibly many outcomes)]{.gray}
 
 . . .
 

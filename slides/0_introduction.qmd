@@ -134,14 +134,14 @@ tinytex::install_tinytex()
 
 ## What most applied social scientists "know" about statistics
 
-Most social scientists "know" a few things about
+Our goal in this class is to understand topics every social scientist needs to know:
 
-- Linear regression (OLS) and two other estimation techniques (logit, probit)
-- **Statistical inference** (standard errors, p-values, null hypothesis)
+- Linear regression (OLS) 
+- Statistical inference (standard errors, p-values, null hypothesis)
 
 . . .
 
-That's it. And some of what they know is wrong!
+Many social scientists *only* know this, and most have important misunderstandings. 
 
 
 ## What most applied social scientists "know" about linear regression (OLS) {.smaller}
