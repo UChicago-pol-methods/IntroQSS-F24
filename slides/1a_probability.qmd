@@ -217,7 +217,7 @@ An **event space** $S$ is a set of events composed in a particular way (for tech
 
 ## Probability measure & Kolmogorov axioms {.smaller}
 
-A **probability measure**  is a function $P : S \rightarrow \mathbb{R}$ that assigns a probability to every event in the event space. 
+A **probability measure**  is a function $P : S \rightarrow \mathbb{R}$ that assigns a number to every event in the event space. 
 
 . . .
 
@@ -250,7 +250,7 @@ If $A \subseteq B$, then $B = A \cup (B \setminus A)$.
 
 Countable additivity implies $P(B) = P(A) + P(B \setminus A)$
 
-So $P(A) \leq P(B)$ (**monotonicity**).
+So by non-negativity, $P(A) \leq P(B)$ (**monotonicity**).
 
 $P(B \setminus A) = P(B) - P(A)$ (**subtraction rule**).
 
