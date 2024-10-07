@@ -38,7 +38,7 @@ A random variable $X$ is a function that maps each outcome $\omega$ to an event 
 
 . . . 
 
-e.g. $X(\omega) = 1$ means that the outcome $\omega$ is part of the event 1.
+e.g. $X(\omega) = 1$ means the outcome $\omega$ is part of the event 1. (NB: Events are now numbers.)
 
 . . . 
 
@@ -63,13 +63,15 @@ Usually we just write $X = 1$ and $\text{Pr}[X = 1]$. [(cf $P(A)$ for events)]{.
 
 ## Why though?
 
-If the events of interest can be quantified, then 
+Many outcomes/events of interest can be quantified:  
 
-- $X$ is a random variable indicating e.g. the number of successes
+- $X = 1$ for Yes/Happened, $X = 0$ for No/Did not happen
+- $X$ is e.g. number of casualties
 
 This is much easier to work with than 
 
-- $A$ is the event that there are 0 successes, $B$ that there are 1 successes, \ldots
+- event $A$:  it happened; event $A^C$ (or $B$): it did not happen
+- event $A$: 0 casualties; event $B$ 1 casualty, \ldots
 
 
 <!-- so probability does not require events to be quantifiable, but when they are this is a lot easier --> 
@@ -192,7 +194,7 @@ ggplot(plotdata, aes(x = x, y = `F(x)`)) +
 
 ## Continuous random variables 
 
-If a random variable could take on a **continuum** of values [(i.e. $X(\Omega)$ includes some interval of the real line)]{.gray}, then we say it is **continuous**.
+If a random variable could take on a **continuum** of values [(i.e. $X(\Omega)$ includes some interval of the real line)]{.gray}, then we say it is **continuous**. Examples?
 
 . . . 
 
@@ -241,7 +243,7 @@ Probability **density** function (PDF) written $f(x)$, CDF written $F(x)$.
 
 . . .
 
-CDF is integral of PDF below $x$: 
+CDF at $x$ is integral of PDF below $x$: 
 
 $$F(x) = \text{Pr}[X \leq x] = \int_{-\infty}^x f(u) du$$
 
@@ -347,14 +349,12 @@ ggplot(unif_plotdata, aes(x = x, y = `F(x)`)) +
 
 ## Bivariate relationships
 
-We might have two random variables -- e.g. flip a coin and draw a ball from an urn.
+A single random process can produce two random variables $X(\omega)$ and $Y(\omega)$.
 
-. . . 
+- rolling a die: $X$ is number on die, $Y$ is 1 if roll 3 or higher
+- sampling a respondent: $X$ is age of respondent, $Y$ is 1 if respondent voted
 
-Or, in a data analysis problem we could view two characteristics as random variables, e.g. 
 
-- age of respondent and whether or not respondent voted
-- GDP of country and how democratic it is
 
 
 ## Describing bivariate relationships

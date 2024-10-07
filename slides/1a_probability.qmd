@@ -492,7 +492,7 @@ $A \perp \!\!\! \perp B$ $\iff P(A \mid B) = P(A).$  $\,\, \blacksquare$ [(divid
 
 . . . 
 
-In subjective terms, if $A$ and $B$ are independent, then knowing $B$ occurred does not affect our assessment of probability that $A$ occurred. 
+In subjective terms, if $A$ and $B$ are independent, then knowing $B$ occurred does not affect our assessment of the probability that $A$ occurred. 
 
 
 ## Independent? 
