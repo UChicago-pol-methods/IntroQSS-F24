@@ -1,0 +1,239 @@
+---
+title: "lab_week_1_2024"
+author: "John Kainer"
+format: pdf
+editor: visual
+---
+
+## Goals for today
+
+In this lab, we will accomplish two things. First, we will learn/review various basic yet essential operations in R. They will be helpful not only on the first problem set but also in projects you do in R in the coming years. Second, we will learn about the fundamentals of writing mathematics in 'R', which applies also to LaTeX. 
+
+As a reminder, you should have the tidyverse and tinytex packages installed. If you have not done so already, please install them, and make sure they are loaded.
+
+```{r}
+#to install 
+install.package('tinytex')
+install.package('tidyverse')
+
+#to load them
+library(tinytex)
+library(tidyverse)
+```
+
+## Rudiments of 'R'
+R can be used as a calculator:
+```{r}
+7 + 5
+```
+
+We often want to store the results of our calcuations as objects in the global environment. 
+```{r}
+Immanuel <- 7 + 5
+print(Immanuel)
+```
+
+## Vectors
+
+A vector in R is one of the simplest data structures. It can be thought of as a list that contains the same type of elements. These elements can be numbers, logical values, characters, and even empty spaces (note: there are 6 categories of vectors in R that are described differently from the ones here, but it is not necessary to know what they are for our purposes).
+
+First, we will make a vector of our courses this quarter.
+
+```{r, message=FALSE}
+my_courses <- c("intro to quant", "advanced national security")
+```
+
+Now, make a different vector of the first five multiples of 2, starting with the number 2.
+
+```{r}
+first_five <- c(2,4,6,8,10)
+```
+
+Once a vector has been created, we can subset out specific elements using their numerical position in the vector and square brackets, i.e., '[]'. For example, we can write a small line of code to add the first and third elements of the list.
+
+```{r, message = FALSE, echo = FALSE}
+first_five[1] + first_five[3]
+```
+
+This method of typing out the vector is not always the most convenient. Here, we only had to make a list of the first 5 multiples of 2. What if you had to list the first 10,000 multiples? How would you make that vector.
+
+```{r}
+two_times <- seq(from = 2, to = 10000, by=2)
+```
+
+## Sampling
+
+We will now learn how to create random samples in R. Since the samples are being generated (somewhat) randomly, we will all have different samples, unless we set a seed. Setting the seed produces the same random values each time, which is very important for producing reproducible results.
+
+```{r, echo=FALSE, message=FALSE}
+set.seed(60615)
+```
+
+The first task is to generate a sample of 50 numbers in the range 500-1000.
+
+```{r, echo=FALSE, message=FALSE}
+random_sample <- sample(x = 500:1000, size = 50)
+
+#now that we have a sample, examine it
+max(random_sample)
+mean(random_sample)
+```
+
+How many unique values are included in the sample? Can you think of any code that will count the number of unique values for you?
+
+```{r, echo=FALSE, message=FALSE}
+length(unique(random_sample))
+```
+
+It seems that all values in the vector we just created are unique values. That is because one of the arguments of the \`\`\`sample\`\`\` function is "replace", and it is set to FALSE by default. This means that the sample is produced without replacement and thus there will be no repetition. You can change the argument to TRUE when you want to allow repetition.
+
+```{r}
+sample_replace <- sample(500:1000, 50, replace = TRUE)
+length(unique(sample_replace))
+```
+
+We may also be able to imagine a situation where we do not want each element in a vector we are sampling to have an equal probability of being sampled. For instance, imagine we are flipping an unfair coin, $P(H) = 0.6$. How would we use the sample funciton for such an experiment?
+
+```{r}
+biased_coinflip <- sample(x = c('H','T'), size = 50, replace = TRUE, prob = c(0.6, 0.4))
+mean(biased_coinflip == "H")
+```
+
+
+Sometimes, we will want to sample from a particular distribution. For instance, we may wish to sample from the standard normal. Try to generate a sample of 50 numbers from the following normal distribution: $X \sim N(\mu=750, \sigma^2 = 10)$.
+
+```{r, echo=FALSE, message=FALSE}
+normal_sample <- rnorm(n = 500, mean = 750, sd = 10)
+```
+
+What would we expect the mean of the sample to be? Calculate it below:
+
+```{r, echo=FALSE, message=FALSE}
+mean(normal_sample)
+```
+
+## Working with Data
+
+```{r}
+library(tidyverse)
+```
+
+Using only these basic functions, we are already able to manipulate panel data. We will use what we learned so far to add a new column to a dataset. The dataset we will use, "Iris", comes preloaded on the 'tidyverse' package. 
+
+This dataset was created by the British statistician Ronald Fisher, who used it to show how a method called 'linear discriminant analysis' could be used to solve 'taxonomic problems.' The method allowed various species of Iris to be distinguished with recourse to only four variables. Fisher's results were published in the 'Annals of Eugenics' (a journal which still exists under the name 'Annals of Human Genetics'). Incidentally, many important contributors to the development of statistics were Eugenicists (perhaps the most notable historical example is Francis Galton). 
+
+
+```{r, message = FALSE, echo = FALSE}
+# load the dataset
+data(iris)
+```
+
+Let's assume that there were some gross measurement errors due to which, we now need to correct the values for the lengths and widths of the sepals. Without using functions from the \`\`\`tidyverse\`\`\` package, add a new column for sepal width that is the measured sepal width minus 1 unit.
+
+```{r, message = FALSE, echo = FALSE}
+
+iris$Sepal.Width.Corrected <- iris$Sepal.Width - 1
+```
+
+Do the same for the length column, but try to use a different function for adding the column.
+
+Hint: we just used it.
+
+```{r, message = FALSE, echo = FALSE}
+
+iris["Sepal.Length.Corrected"] <- iris["Sepal.Length"] - 1
+```
+
+Finally, let's add a column with a condition on the species. It should say "TRUE" if the species is "setosa" and "FALSE" otherwise.
+
+```{r, message = FALSE, echo = FALSE}
+iris$Is.Setosa <- ifelse(iris$Species == "setosa", TRUE, FALSE)
+```
+
+## Aside on Square Brackets in 'R'
+
+Square brakets are very important in 'R'. Although the syntax for using square brackets is, strictly speaking, clear, it is not necessarily intuitive. 
+
+In the example above, 
+```{r}
+iris["Sepal.Length.Corrected"] <- iris["Sepal.Length"] - 1
+```
+[] calls on a specific column of the dataset and also references a new column that we are defining. Note here that the "Sepal.Width.Corrected" column does not exist in the dataset yet. Nevertheless, 'R' 'knows' to add this column. However, if a column with the same name had already been in the dataset, it would have been overwritten.
+
+Generally speaking, we can think of brackets as extracting element(s) from various kinds of data structures. Recall another example in which brackets were used (excuse my passive voice)
+
+```{r}
+first_five <- c(2,4,6,8,10)
+
+print(first_five[4])
+```
+Here, the brackets extrated the 4th element in the vector, which was the number 8. 
+
+But what if we wanted to specifiy more general conditions for indexing the elements of some data structure or other?
+```{r}
+print(first_five[first_five>6])
+```
+
+Now we extract the elements of the vector whose numerical value is greater than 6. Critically, we can apply functions to what we extract in advance of extracting it. 
+```{r}
+mean(first_five[first_five>6])
+```
+
+Now, we will do a slightly more complicated example. Nevertheless, all the same principles apply. 
+```{r}
+#I am going to make a longer vector of multiples of 2 for this example
+first_nine <- c(2,4,6,8,10,12,14,16,18)
+```
+
+I will make a second vector, which will also show you how 'R' treats logical values. 
+```{r}
+logicals <- c(TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE)
+#for your information, T and F will also work for logicals
+mean(logicals)
+```
+Note that 'R' treats the logical TRUE as having a value of 1. 
+
+Now, consider the follwoing. What will be the result?
+```{r}
+print(first_nine[first_nine > 5*mean(logicals)])
+```
+
+Here is a bonus problem. 
+```{r}
+print(first_nine[!logicals])
+```
+The answer will be all elements of two_times that correspond to the position of FALSE. So the output will be 4,6,18.
+
+##Writing Math in 'R' and LaTeX
+
+There are two ways in which we typically write math in academic politcal science (and on your problem sets). You may want to write mathematics in a paragraph containing primarily text. Alternatively, you might want to have an equation (or somehting like that) constitute its own paragraph in your papaer. 
+
+If you want to write something in a paragraph, you can surround it with 'dollar signs.' Among other things, this will make your math look nicer. For example, $y = mx + b$ looks better than y = mx + b. This becomes more dramatic when you have something like $\frac{3}{8} + \frac{6}{16} = \frac{3}{4}$, which is not only prettier but also more readable than certainly is much easier to read than 3/8+6/16=3/4.
+
+Even so, it is not always merely an aesthetic matter. Sometimes using math requires writing symbols that do not exist on standard keyboards. For instance, we use the greek 'Omega' to refer to a sample space. The roman analogue is the letter 'O', but what we really want is the symbol. The LateX syntax allows us to do this, for example let $\Omega = {1,2,3,4,5,6}$. The set $A = \{\omega \in \Omega\ \colon \omega \: \text{is even} \} = \{2, 4, 6 \}$. 
+
+ Although it takes some getting used to, using this syntax eventually becomes familiar. It is quite tedious, it is among the easiest ways to write mathematics in word processors. 
+ 
+ Sometimes, we don't want our math to be 'in-text.' In these instances, we can go into 'math mode.'
+ 
+ $$
+ \bar{x} = \frac{1}{n} \Sigma_{i=1}^{n} x_i
+ $$
+We can also do line breaks to show our work. To take a very silly example, solve for x
+$$
+\begin{aligned}
+2x + 8 = 12 \\
+2x = 12-8 \\
+2x = 4 \\
+x = 2
+\end{aligned}
+$$
+Generally speaking, if you are curious about how to write particular mathematical symbol, the best thing to do is google 'how to wrte X in LaTeX' where $X \equiv \text{the symbol you want}$. However, there are two symbols that may be useful on your problem set: 
+
+$$
+\begin{aligned}
+\cup, \: \text{for union, as in} \: P(A \cup B) \\
+\cap, \: \text{for intersection, as in} \: P(A \cap B) \\
+\end{aligned}
+$$
+Generally speaking, I will not teach you particular mathematical symbols. Google is your friend. 
