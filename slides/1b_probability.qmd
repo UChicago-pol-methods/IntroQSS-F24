@@ -536,7 +536,7 @@ $\forall y \in \mathbb{R}$ and $\forall x \in \text{Supp}[X]$.
 . . .
 
 - Just like conditional probability for events
-- Intuitively, take the joint probabilities where $X = x$ and scale them up by $\text{Pr}[X = x]$
+- Intuitively, take the joint probability of $X = x$ and $Y = y$ and scale it up by $\text{Pr}[X = x]$
 
 
 
@@ -666,7 +666,7 @@ To get $f_Y(y)$ for all $y$s, think about squishing the PDF into the $y$-axis.
 ## Conditional PDF in the continuous case
 
 
-$$f_{Y \mid X}(y \mid x) = \frac{f(x,y)}{f(x)}, \forall y \in \mathbb{R} \, \text{and} \, \forall x \in \mathrm{Supp}[X]$$
+$$f_{Y \mid X}(y \mid x) = \frac{f(x,y)}{f_X(x)}, \forall y \in \mathbb{R} \, \text{and} \, \forall x \in \mathrm{Supp}[X]$$
 
 ```{r}
 #| message: false
@@ -682,7 +682,7 @@ plot3d(datt2, col = "lightblue", alpha = .5,
 rgl.close()
 ```
 
-For a specific $x$, what does $f(x,y)$ look like? What does $f(x)$ look like? 
+For a specific $x$, what does $f(x,y)$ look like? What does $f_X(x)$ look like? 
 
 
 
@@ -716,7 +716,7 @@ fx <- sum(z)*(y[2] - y[1])
 
 ```
 
-And $f(x)$ is the integral of that intersection: numerically I compute it to be about `r round(fx, 2)`.
+And $f_X(x)$ is the integral of that intersection: numerically I compute it to be about `r round(fx, 2)`.
 
 ## Conditional PDF (3)
 
