@@ -1,0 +1,167 @@
+---
+title: "Lab Week 2: More Probability"
+format: pdf
+editor: source
+---
+
+## Simulation
+
+**Suppose you work at a clinic and conduct tests for a disease. The test you use is of low quality, so it often gives false positives and false negatives. In actuality, 30% of the population has the disease. However, the false positive rate is 2/10, which means that out of every 10 patients who did *not* have the disease, two patients were told that they did. The false negative rate is 1/100, which means for every 100 patients who have the disease, 1 is told incorrectly that she does not.**
+
+We will write the code for a simulation to determine the probability of the test turning positive, accounting for the actual percentage of people who have the disease (accounting for incorrect test results). Assume you test 10,000 people in one day.
+
+A simulation is simply the reproduction of a real-world process or phenomenon. What do you think we would need to create a simulation of the clinical outcomes described above?
+
+\*a world of people, including some who have the disease and some who don't
+
+\*a bunch of tests administered to the people in this world
+
+```{r}
+#create a world of sick and healthy patients. This represents the 'real world' 
+nsick <- 3000
+nhealthy <- 7000
+patient_sick <- c(rep(T, nsick), rep(F, nhealthy))
+```
+
+\*How many of the sick patients will get a positive test?
+
+\*How many of the healthy patients will get a positive test?
+
+\*How many of the sick patients will get a negative test?
+
+\*How many of the healthy patients will get a negative test?
+
+```{r}
+#administer the tests, get the results 
+test_results <- c(rep(T, nsick*(99/100)), 
+                     rep(F, nsick*(1/100)),
+                     rep(T, nhealthy*(2/10)), 
+                     rep(F, nhealthy*(8/10)))
+```
+
+Now, you just need to calculate the proportion of total test results that are positive. What R function that we have used extensively until now could help with that?
+
+Hint: how does R treat boolean values internally?
+
+```{r}
+#get the number of positive test results from the total number of test results
+mean(test_results)
+```
+
+How would you mathematically express the probability you just calculated?
+
+$$
+P(positive) = P(positive|sick)P(sick) + P(\frac{positive}{healthy})P(healthy)
+$$
+
+Aside: Note that we have not yet used the set of sick patients we created. It could be useful in answering a question on the problem set.
+
+## Working with Distributions
+
+We can generate random samples in R that conform to various distributions. We hinted at this in last weeks lab, where I briefly overviewed the rnorm() function. Since some distributions are used extensively - such as the normal, uniform, chi-squared, etc - there are special functions in R that optomised for wokring with these distributions. Pedagogically, we are concerned that you are familiar with the uniform and the normal distributions. In statistics (for reasons you will learn about later in class), the normal distribution is the 'most important.' We will deal with this distribution first. 
+
+### Normal Distribution
+
+Two important functions:
+
+\*rnorm(): samples from a normal distribution. 
+
+\*pnorm(): calculates the CDF of normal distribution (area below a particular value). Useful for integration. 
+
+Task: Create a random sample of 20 numbers from a normal distribution with mean 25 and standard deviation 5.
+
+```{r}
+norm_sample <- rnorm(n = 20, mean = 25, sd = 5)
+```
+
+Before we plot this sample, what do you expect the sample to look like?
+
+```{r}
+hist(norm_sample)
+```
+
+This sample does not look normal, like the underlying distribution, because it is very small. As a result, outliers play a huge effect. The larger the sample gets, the more it starts to resemble a normal distribution.
+
+```{r}
+norm_sample <- rnorm(10000, 25, 5)
+hist(norm_sample)
+```
+
+We use pnorm() to calculate the CDF of a normal distribution. As we discussed in class, the CDF tells you the probability of getting a random variable that is less than or equal to a particular value.
+
+Task: Suppose a class of 100 students took an exam, and most students scored around 50% because it was ridiculously hard. You are now trying to recalibrate the difficulty level of the class. To determine how much you need to change the coursework, you need to know how many students scored under 60%. Use pnorm() to calculate that.
+
+```{r}
+pnorm(q=60,
+      mean=50,
+      sd = 10,
+      lower.tail = TRUE)
+```
+
+Task: What percentage of students received exactly 50%? You can figure this out using the pdf. 
+
+```{r}
+dnorm(x=50,
+      mean = 50, 10)
+```
+
+### Uniform Distribution
+
+A random variable is distributed uniformly if all values in the given range are equally likely to be realised.
+
+Uniform distributions are easy and fun to work with. The CDF is always a rectangle, with the x-axis being the range of values, say $[a,b]$. The base of the rectangle is $b-a$, and the area of the rectangle is $1$. So the height of the rectangle is given by the reciprocal of the base Substantively, how would interpret the height of the rectangle? (the probability of some value)
+
+We saw above that a normal distribution is completely defined by its mean and standard deviation. What should the parameters of the uniform distribution be? (min and max)
+
+Task: Generate a random sample of 100 numbers drawn from a uniform distribution on the unit interval.
+
+```{r}
+unif_sample <- runif(100, 0, 1) 
+```
+
+What would you expect the average value of the uniform distribution to be?
+
+Like with the normal distribution, you can also calculate the probability of realising a particular value from a uniform distribution and the probability of realising a random variable less than or equal to a particular value.
+
+Suppose you are at a bus stop and waiting for the bus to arrive. It could arrive at any point within the next 30 minutes. Is the bus more likely to come in the next 20 minutes or the next 30 minutes?
+
+What is the probability that it comes in the next 20 to 30 minutes, that is, $P(20 \leq X \leq 30)$?
+
+```{r}
+punif(30, min=0, max=60, lower.tail = TRUE) - punif(20, min=0, max=60, lower.tail = TRUE)
+```
+
+What would be the probability that the bus comes after 30 minutes but before an hour is up?
+```{r}
+P_30_to_60 <- punif(60, min=0, max=60) - punif(30, min=0, max=60)
+P_30_to_60
+```
+
+Answer:
+
+Finally, what is the probability of the bus coming at any given moment in the next hour (using R and computationally)?
+
+```{r}
+dunif(2, 0, 60)
+```
+Note: 2 is arbitrary. One could have chosen any number. 
+
+### Binomial Distribution
+
+A binomial distribution, unlike the 2 discussed above, is the discrete probability distribution of a random variable in which we observe success with probability $p$ and failure with probability $q=1-p$.
+
+For example, if I didn't study for an exam but did pay attention in class, I do have some chance of answering the questions correctly. Suppose there is a 60% chance I get the answer right. If there are 10 questions, which each correct question is given 1 point, what is my expected score for?
+
+$$
+E[X] = 6
+$$
+
+We can generate 5 binomial (in this case, also Bernoulli) samples of graded exams.
+
+```{r}
+exam <- rbinom(5, 10, 0.6)
+mean(exam)
+```
+
+What is this vector? What do the numbers in it represent?
+
