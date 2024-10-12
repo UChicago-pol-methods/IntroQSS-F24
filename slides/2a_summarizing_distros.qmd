@@ -6,12 +6,16 @@ format:
   revealjs:
     smaller: false
     slide-number: c/t
-    css: ["default", "uchicago_pol_meth.css"]
+    css: ["uchicago_pol_meth.css", "default"]
     theme: simple
     echo: false
     embed-resources: true
+    html-math-method:
+      method: mathjax
+      url: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML"
 
 ---
+
 
 ```{r}
 #| warning: false
@@ -24,6 +28,8 @@ knitr::opts_chunk$set(dev = "ragg_png")
 
 # Expectations {background-image="assets/hbc_great_expectations.png" background-size="450px" background-repeat="repeat"}
 
+\def\E{{\textrm E}\,}
+\def\V{{\textrm V}\,}
 
 ## Motivation
 
@@ -46,11 +52,11 @@ How can we summarize this distribution?
 
 For discrete R.V. with probability mass function (PMF) $f(x)$, the *expected value* of $X$ is 
 
-$$E[X] = \sum_x x f(x) $$
+$$\E[X] = \sum_x x f(x) $$
 
 Could write 
 
-$$E[X] = \sum_{x \in \text{Supp}[X]} x f(x) $$
+$$\E[X] = \sum_{x \in \text{Supp}[X]} x f(x) $$
 
 
 ## Example 
@@ -71,7 +77,7 @@ $$E[X] = \sum_{x \in \text{Supp}[X]} x f(x) $$
 ::: {.column width="50%"}
 
 $$
-f(x) = \begin{cases}
+f(x) = \begin{cases} \,
 .2 & x = 0 \\\
 .5 & x = 1 \\\
 .3 & x = 3 \\\
@@ -85,12 +91,12 @@ $$
 
 . . . 
 
-What is $E[X] = \sum_x x f(x)$?
+What is $\E[X] = \sum_x x f(x)$?
 
 . . .
 
 $$\begin{aligned}
-E[X] &=  0 \times .2 + 1 \times .5 + 3 \times .3 \\
+\E[X] &=  0 \times .2 + 1 \times .5 + 3 \times .3 \\
  &= 1.4
 \end{aligned}$$
 
@@ -117,15 +123,15 @@ dat|>
 
 You know about taking the **average** or **mean** of a set of numbers $x_1, x_2, \ldots, x_n$: 
 
-$$ \overline{x} = \frac{1}{n} \sum_{i = 1}^n x_i $$
+$$ \overline{x}  = \frac{1}{n} \sum_{i = 1}^n x_i $$
 
 Just as a probability is a long-run frequency, an expectation is a long-run average.  
 
 . . .
 
-- $E[X]$ summarizes a random variable $X$; $\overline{x}$ summarizes a set of numbers
-- if each $x_i$ is an **independent sample** from $X$, $\overline{x}$ approximates $E[X]$ [(more closely with larger samples)]{.gray}
-- if each $x \in \text{Supp}[X]$ appears in the sample with frequency *exactly* $f(x)$, then $\overline{x} = E[X]$
+- $\E[X]$ summarizes a random variable $X$; $\overline{x}$ summarizes a set of numbers
+- if each $x_i$ is an **independent sample** from $X$, $\overline{x}$ approximates $\E[X]$ [(more closely with larger samples)]{.gray}
+- if each $x \in \text{Supp}[X]$ appears in the sample with frequency *exactly* $f(x)$, then $\overline{x} = \E[X]$
 
 
 
@@ -134,7 +140,7 @@ Just as a probability is a long-run frequency, an expectation is a long-run aver
 Given PMF:
 
 $$
-f(x) = \begin{cases}
+f(x) = \begin{cases}   \,
 .2 & x = 0 \\\
 .5 & x = 1 \\\
 .3 & x = 3 \\\
@@ -142,7 +148,7 @@ f(x) = \begin{cases}
 \end{cases}
 $$
 
-Then $E[X] = 0 \times .2 + 1 \times .5 + 3 \times .3 = 1.4$.
+Then $\E[X] = 0 \times .2 + 1 \times .5 + 3 \times .3 = 1.4$.
 
 . . .
 
@@ -150,7 +156,6 @@ Alternative method: make a vector of length $n$ where each $x$ appears $n f(x)$ 
 
 ```{r, echo =T}
 x <- c(0, 0, 1, 1, 1, 1, 1, 3, 3, 3)
-# alternative way: x <- c(rep(0, 2), rep(1, 5), rep(3, 3))
 mean(x)
 ```
 
@@ -163,7 +168,7 @@ Why does this work?
 If each unique $x$ appears $n f(x)$ times, then
 
 $$\begin{aligned} \overbrace{\frac{1}{n} \sum_i x_i}^{\text{Average}} &= \frac{1}{n} \sum_x x   n f(x)  \\
-&= \frac{n}{n} \sum_x x  f(x) = E[X] \end{aligned}$$
+&= \frac{n}{n} \sum_x x  f(x) = \E[X] \end{aligned}$$
 
 . . .
 
@@ -175,7 +180,7 @@ May clarify why, in any given sample, $\overline{x} \neq E[X]$.
 
 For continuous R.V. $X$, 
 
-$$ E[X] = \int_{-\infty}^{\infty} x f(x) dx $$ 
+$$ \E[X] = \int_{-\infty}^{\infty} x f(x) dx $$ 
 
 . . .
 
@@ -226,13 +231,13 @@ For example, if $g(x) = 3X$, then $\Pr[g(X) = 3] = \Pr[X = 1]$.
 <!-- isn't this not quite right -- e.g. if g(X) = x^2, then \Pr[g(X) = 1] = \Pr[X = 1] + \Pr[X = -1]-->
 <!-- some confusion about big X little x -->
 
-## $E[X]$ as a "good guess" {.smaller}
+## $\E[X]$ as a "good guess" {.smaller}
 
 For R.V. $X$, consider $(X - c)^2$ for some constant $c$. [(A function of a random variable.)]{.gray}
 
 . . .
 
-Define **mean squared error** of $X$ about $c$ as $E[(X - c)^2]$.
+Define **mean squared error** of $X$ about $c$ as $\E[(X - c)^2]$.
 
 . . .
 
@@ -254,12 +259,12 @@ $$
 
 . . .
 
-$E[X]$ is the choice of $c$ that minimizes MSE. (Wait for proof.)
+$\E[X]$ is the choice of $c$ that minimizes MSE. (Wait for proof.)
 
 
 
 
-## Bonus: $E[X]$ as X's center of mass  {.smaller}
+## Bonus: $\E[X]$ as X's center of mass  {.smaller}
 
 Suppose we place a weight $f(x)$ at each value $x \in \text{Supp}(X)$ along a weightless rod.
 
@@ -273,7 +278,7 @@ It is the point $c$ where $\sum_x (x - c) f(x) = 0$.
 
 . . .
 
-That point is $E[X]$.
+That point is $\E[X]$.
 
 . . .
 
@@ -308,11 +313,11 @@ Consider this joint PMF $f(x, y)$ for $X$ and $Y$ [(e.g. state 1 militarizes, st
 :::{.column width="50%"}
 
 $$
-f(x,y) = \begin{cases}
+f(x,y) = \begin{cases} \,
 1/10 & x = 0, y = 0 \\\
 1/5 & x = 0, y = 1 \\\
 1/5 & x = 1, y = 0 \\\
-1/2 & x = 1, y = 1 \\\
+1/2 & x = 1, y = 1 \\\ 
 0 & \text{otherwise}
 \end{cases}
 $$
@@ -321,13 +326,13 @@ $$
 ::::
 . . . 
 
-What is $E[XY]$? [(will need e.g. for covariance)]{.gray}
+What is $\E[XY]$? [(will need e.g. for covariance)]{.gray}
 
 . . .
 
 
 $$\begin{aligned}
-E[XY] &\equiv \sum_x \sum_y xy f(x, y) \\
+\E[XY] &\equiv \sum_x \sum_y xy f(x, y) \\
 &= 0 \times 1/10 + 0 \times 1/5 + 0 \times 1/5 + 1 \times 1/2 \\
  &= 1/2 
 \end{aligned}$$
@@ -335,19 +340,19 @@ E[XY] &\equiv \sum_x \sum_y xy f(x, y) \\
 
 ## Linearity of expectations  {.smaller}
 
-Let $X$ and $Y$ be RVs. Then $\forall a, b, c \in \mathbb{R}$, $E[aX + bY + c] = aE[X] + bE[Y] + c$
+Let $X$ and $Y$ be RVs. Then $\forall a, b, c \in \mathbb{R}$, $\E[aX + bY + c] = a\E[X] + b\E[Y] + c$
 
 . . . 
 
 Proof (discrete case): 
 
 $$\begin{align}
-E[aX + bY + c] &= \sum_x \sum_y (ax + by + c) f(x,y) \\
+\E[aX + bY + c] &= \sum_x \sum_y (ax + by + c) f(x,y) \\
 &= \sum_x \sum_y ax f(x,y) +  \sum_x \sum_y by f(x,y) + \sum_x \sum_y c f(x,y) \\
 &= a \sum_x \sum_y x f(x,y) +  b \sum_x \sum_y y f(x,y) + c \sum_x \sum_y f(x,y) \\
 &= a \sum_x x \sum_y f(x,y) +  b \sum_y y \sum_x f(x,y) + c \sum_x \sum_y f(x,y) \\
 &= a \sum_x x f_X(x) +  b \sum_y y f_Y(y) + c \sum_x f_X(x)\\
-&= a E[X] +  b E[Y] + c 
+&= a \E[X] +  b \E[Y] + c 
 \end{align}$$
 
 
@@ -393,7 +398,7 @@ What would the output of `sum(tens[samp == "b"])` be (approximately)?
 
 ## Variance: definition and example {.smaller}
 
-$$V[X] \equiv E[(X - E[X])^2]$$
+$$\V[X] \equiv \E[(X - \E[X])^2]$$
 
 . . .
 
@@ -415,22 +420,22 @@ $$
 
 :::{.column width="50%}
 
-We can compute $(X - E[X])^2$ at each $x$:
+We can compute $(X - \E[X])^2$ at each $x$:
 
-| $x$ | $f(x)$ | $(x - E[X])^2$|
+| $x$ | $f(x)$ | $(x - \E[X])^2$|
 |-----|:----:|:---:|  
-|   0   | $1-p$ | $p^2$ |
-|   1   | $p$ |  $1 - 2p + p^2$ |
+|   0   | $\color{green}{1-p}$ | $\color{red}{p^2}$ |
+|   1   | $\color{blue}{p}$ |  $\color{orange}{1 - 2p + p^2}$|
 
 :::
 ::::
 
 . . .
 
-And then variance as $E[(X - E[X])^2]$:
+And then variance as $\E[(X - \E[X])^2]$:
 
 $$\begin{aligned}
-V[X] &= E[(x - E[X])^2] \\ &= p^2(1-p) + (1 - 2p + p^2)p \\ &= p^2 - p^3 + p - 2p^2 + p^3 \\ &= p(1 - p)\end{aligned}$$
+\V[X] &= \E[(x - \E[X])^2] \\ &= \color{red}{p^2}\color{green}{(1-p)} + \color{orange}{(1 - 2p + p^2)}\color{blue}{p} \\ &= p^2 - p^3 + p - 2p^2 + p^3 \\ &= p(1 - p)\end{aligned}$$
 
 ## Graphical example
 
@@ -454,27 +459,27 @@ $$
 
 Alternative formulation for variance: 
 
-$$V[X] = E[X^2] - E[X]^2$$
+$$\V[X] = \E[X^2] - \E[X]^2$$
 
 . . .
 
-What is $E[X]$? What is $E[X^2]$?   
+What is $\E[X]$? What is $\E[X^2]$?   
 
 . . .
 
 By this alternative formula, we then have 
 
-$$V[X] = p - p^2 = p(1-p)$$
+$$\V[X] = p - p^2 = p(1-p)$$
 
-## Proof that $V[X] = E[X^2] - E[X]^2$
+## Proof that $\V[X] = \E[X^2] - \E[X]^2$
 
 $$\begin{align}
-V[X] &= E\left[(X - E[X])^2\right] \\
-&= E\left[X^2 - \color{blue}{2E[X]} X + E[X]^2\right] \\
-&= E[X^2] - E\left[\color{blue}{2E[X]} X\right] + E\left[E[X]^2\right] \\
-&= E[X^2] - \color{blue}{2E[X]} E[X] + E[X]^2 \\ 
-&= E[X^2] - 2 E[X]^2 + E[X]^2 \\ 
-&= E[X^2] - E[X]^2
+\V[X] &= \E\left[(X - \E[X])^2\right] \\
+&= \E\left[X^2 - \color{blue}{2\E[X]} X + \E[X]^2\right] \\
+&= \E[X^2] - \E\left[\color{blue}{2\E[X]} X\right] + \E\left[\E[X]^2\right] \\
+&= \E[X^2] - \color{blue}{2\E[X]} \E[X] + \E[X]^2 \\ 
+&= \E[X^2] - 2 \E[X]^2 + \E[X]^2 \\ 
+&= \E[X^2] - \E[X]^2
 \end{align}$$
 
 
@@ -482,26 +487,26 @@ V[X] &= E\left[(X - E[X])^2\right] \\
 
 For a random variable $X$,
 
-- $\forall c \in \mathbb{R}$, $V[X + c] = V[X]$
-- $\forall a \in \mathbb{R}$, $V[aX] = a^2V[X]$
+- $\forall c \in \mathbb{R}$, $\V[X + c] = \V[X]$
+- $\forall a \in \mathbb{R}$, $\V[aX] = a^2\V[X]$
 
 . . . 
 
-Proof of second point: 
+Proof of first point: 
 
 $$\begin{align}
-V[aX] &= E\left[(aX - E[aX])^2\right] \\
-&= E\left[(aX - aE[X])^2\right] \\
-&= E\left[a^2(X - E[X])^2\right] \\
-&= a^2 E\left[(X - E[X])^2\right] \\
-&= a^2 V[X]
+\V[X + c] &= \E\left[(X + c - \E[X + c])^2\right] \\
+&= \E\left[(X + c - \E[X] - \E[c])^2\right] \\
+&= \E\left[(X + c - \E[X] - c)^2\right] \\
+&= \E\left[(X - \E[X])^2\right] \\
+&= \V[X]
 \end{align}$$
 
 ## Standard deviation
 
 Standard deviation:
 
-$$\sigma[X] = \sqrt{V[X]}$$
+$$\sigma[X] = \sqrt{\V[X]}$$
 
 Roughly, "how far does $X$ tend to be from its mean"? 
 
@@ -517,16 +522,16 @@ tibble(p = seq(0, 1, length = 1000)) |>
 
 ```
 
-## Revisiting justification for $E[X]$ 
+## Revisiting justification for $\E[X]$  {.smaller}
 
 Alternative formula for MSE:
 
 $$\begin{align}
-E[(X - c)^2] &= E\left[X^2 - 2cX + c^2\right] \\
-&= E[X^2] - 2cE[X] + c^2 \\
-&= E[X^2] - \color{red}{E[X]^2} + \color{green}{E[X]^2} - 2cE[X] + c^2 \\
-&= \left(E[X^2] - \color{red}{E[X]^2}\right) + \left(\color{green}{E[X]^2} - 2cE[X] + c^2\right) \\
-&= V[X]  + \left(E[X] - c\right)^2
+\E[(X - c)^2] &= \E\left[X^2 - 2cX + c^2\right] \\
+&= \E[X^2] - 2c\E[X] + c^2 \\
+&= \E[X^2] - \color{red}{\E[X]^2} + \color{green}{\E[X]^2} - 2c\E[X] + c^2 \\
+&= \left(\E[X^2] - \color{red}{\E[X]^2}\right) + \left(\color{green}{\E[X]^2} - 2c\E[X] + c^2\right) \\
+&= \V[X]  + \left(\E[X] - c\right)^2
 \end{align}$$
 
 . . . 
@@ -537,31 +542,31 @@ So what $c$ should you choose to minimize MSE?
 
 ## Parametric distributions
 
-Given any RV $X$ with associated PMF/PDF or CDF, we can compute $E[X]$ and $V[X]$.
+Given any RV $X$ with associated PMF/PDF or CDF, we can compute $\E[X]$ and $\V[X]$.
 
 . . .
 
 For special types of RV, these parameters *define* the distribution:
 
-- Bernoulli distribution identified by $E[X]$ ($p$)
-- Normal distribution identified by $E[X]$, $V[X]$ ($\mu$, $\sigma^2$)
+- Bernoulli distribution identified by $\E[X]$ ($p$)
+- Normal distribution identified by $\E[X]$, $\V[X]$ ($\mu$, $\sigma^2$)
 
 . . . 
 
-But don't get confused: any RV has $E[X]$ and $V[X]$, not just these special ones.
+But don't get confused: any RV has $\E[X]$ and $\V[X]$, not just these special ones.
 
 
 ## Other things not to get confused about
 
-Sometimes "mean" means $E[X]$ (e.g. *mean squared error* or $\mu$ of a normal distribution), sometimes it means "sample mean" or "average" of some numbers (e.g. `mean(c(2,4,6))`). 
+Sometimes "mean" means $\E[X]$ (e.g. *mean squared error* or $\mu$ of a normal distribution), sometimes it means "sample mean" or "average" of some numbers (e.g. `mean(c(2,4,6))`). 
 
-Sometimes "variance" means $V[X]$, sometimes it means "sample variance" (e.g. `var(c(2,4,6))`).
+Sometimes "variance" means $\V[X]$, sometimes it means "sample variance" (e.g. `var(c(2,4,6))`).
 
 . . . 
 
 There is a close relationship, but remember that 
 
-- $E[X]$ and $V[X]$ are **operators** that convert a **distribution** (PMF, PDF, CDF) into a number, and 
+- $\E[X]$ and $\V[X]$ are **operators** that convert a **distribution** (PMF, PDF, CDF) into a number, and 
 - `mean()` and `var()` are **`R` functions** that convert a **vector of numbers** (e.g. a sample) into a number. 
 
 
