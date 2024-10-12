@@ -19,7 +19,6 @@ format: pdf
 
 ## Question 1: Expected value 
 
-<!-- change the PMF, ask the same question --> 
 
 Consider the random variable $X$ characterized by the following PMF.
 
