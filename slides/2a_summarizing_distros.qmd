@@ -172,7 +172,7 @@ $$\begin{aligned} \overbrace{\frac{1}{n} \sum_i x_i}^{\text{Average}} &= \frac{1
 
 . . .
 
-May clarify why, in any given sample, $\overline{x} \neq E[X]$.
+May clarify why, in any given sample, $\overline{x} \neq \E[X]$.
 
 
 
