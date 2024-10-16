@@ -1,5 +1,5 @@
 ---
-title: "PLSC30500, Fall 2023"
+title: "PLSC30500, Fall 2024"
 subtitle: "Part 2. Summarizing distributions (part a)"
 author: "Andy Eggers"
 format: 
