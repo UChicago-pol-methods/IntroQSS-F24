@@ -1,0 +1,190 @@
+---
+title: "Lab 3: Operators, Functions, For Loops"
+format: pdf
+editor: source
+---
+## Expectation and Variance
+
+Expectation E[X] and Variance V[X] are operators. They 'operate' on random variables; that is, they take random variables as inputs and produce a numerical result. With regard to expectations, the 'operation' is as follows
+
+$$
+\begin{align}
+E[X] = \Sigma_{n}xf(x) \\
+\\
+E[X]= \int_{-\infty}^{\infty}xf(x) dx
+\end{align}
+$$
+It can be thought of as the 'average' value of the random variable after many realizations. 
+
+Regarding Variance, the 'operation' is:
+
+$$
+\begin{align}
+V[X] = E[(X-E[X])^2] \\
+\\
+\text{or, equivalently} \\
+\\
+V[X] = E[X^2] - E[X]^2
+\end{align}
+$$
+Conceptually,it can be understood as a measure of the variability or 'spread' of a variable. 
+
+It is true that 'R' has built-in 'functions' such as 'var()' by which one may calculate the variance of some random variable or other. However, it is very important to keep in mind what the variance concretely is. That is, the definition of the variance as the expectation of the squared difference of x from its expected value. In your homework, please do not use the built-in 'R' functions to calculate these things. 
+
+## Functions
+
+A function in R is a mapping from inputs (or arguments) to an output. This is very similar to the mathematical definition of a function. You have already worked with many R functions, even if you haven't thought of them in these terms (e.g. \`mean()\`, \`rnorm()\`, \`sample()\`).
+
+What arguments do you pass into these various functions? What do they give you as output?
+
+With the functions you have used so far, these have been defined for you by either base R or the packages that you use. However, it is possible for you to write your own functions in 'R.' This is an extremely powerful tool for tasks that need to be repeated many times.
+
+The basic components of a function are:
+
+-   name (should be descriptive),
+
+-   arguments (these are your inputs), and
+
+-   body (instructions for manipulating the inputs).
+
+In 'R', you can make your own functions with the following syntax:
+
+```{r}
+name <- function(arguments)
+  {instructions}
+```
+
+To put things very simply: in the parentheses, you can input the 'arguments' that the function uses. In the curly brackets, you put what you want the function to 'do' with them. 
+
+## Interpreting Functions
+
+Take a look at this function. Can you describe what it does? What are the components?
+
+`my_function <- function(x){`
+
+`x - mean(x, na.rm = TRUE)`
+
+`}`
+
+Generate some data to test your prediction (any method is fine, but make sure it's small enough that you can quickly check if it is working correctly). Put the function in a chunk and call it on your data. Does it work?
+
+```{r}
+demean <- function(x) {  
+  x - mean(x, na.rm = TRUE)
+}
+data <- c(1:10, NA)
+demean(data)
+```
+
+Scatterplot:
+
+```{r}
+demeaned <- demean(data)
+
+plot(x = data, y = demeaned)
+
+```
+
+## Writing Functions
+
+Ok, now it's your turn!
+
+Task 1: Write a function that will give you the value of $(a-b)^n$. Before you code anything, think about the information you would need to extract from the data to answer this question. Then figure out how to use those data points to produce the value you want. Then try to produce code to do it for you.
+
+Once you are done, calculate $(20-3)^{94}$.
+
+```{r}
+
+```
+
+Task 2: Write a function that, when fed 3 vectors, will calculate the mean of each vectors, and give you the difference between the means of the three vectors. Once you are confident your code is working, test it for the following 3 vectors: $(4,10,38)$, $(26,29,21,100)$, and $(84, 87, 106, 200)$.
+
+
+```{r}
+
+```
+
+## For Loops
+
+The other important coding skill required for this pset is being able to use "for" loops. What are they for? Basically, the for loop allows you to repeat the same process over and over again. 
+
+They are good for iterating the same block of code over the elements of a sequence. In other words, they will execute the same code on a bunch of different items at one go, instead of you having to rewrite the same chunk of code again and again with only modifications to the arguments.
+
+The syntax is as follows
+```{r}
+for(x in range){do something}
+```
+
+Components of a for loop:
+
+-   the "for" statement, of the form `for (variable in range)`
+
+    -   the variable is a placeholder for the item you are iterating over
+
+    -   the range is derived the vector (can be other objects but let's stick to vector for our purposes) you want to iterate over
+
+-   code block encased in `{}`
+
+### Example
+
+What do you think the following piece of code is doing? After we discuss the code, it.
+
+```{r}
+nums <- seq(from=1, to = 100, by=2)
+for (i in 1:length(nums)){
+  nums[i] - mean(nums)
+}
+```
+
+Is the output what you expected? If not, discuss why.
+
+**Answer:** The code is working perfectly, but we're are not seeing any output because we did not store it anywhere. The elements of the vector are getting demeaned, but we don't see them anywhere because we did not store them anywhere OUTSIDE of the for loop. So once the loop is done running, the output is lost.
+
+How should we fix it?
+
+```{r}
+nums <- seq(from=1, to = 100, by=2)
+storage <- rep(NA, time = length(nums))
+for (i in 1:length(nums)){
+  storage[i] <- i - mean(nums)
+}
+print(storage)
+```
+
+What if we had the following code instead? Would the code work as above?
+
+```{r}
+nums <- seq(from=1, to = 100, by=2)
+storage <- rep(NA, time = length(nums))
+for (i in length(nums)){
+  storage[i] <- i - mean(nums)
+}
+print(storage)
+```
+
+**Answer:** The code does not work as above because `length(nums)` is a number. So `i in length(nums` is just 1 number, and the code is not iterating over the entire vector. You can use `seq_along` to rectify this issue as well.
+
+## Math 
+Recall the importance of the \align{} code in LaTeX. Without this, your code will be a cacophony. So, for example, the proof that the two statements of variance are equivalent:
+
+$$
+\begin{align}
+V[X] = E[(X-E[X])^2] \\
+= E[X^2 − 2XE[X] + E[X]^2] \\
+= E[X]^2 − 2E[XE[X]] + E[E[X]^2] \\ 
+= E[X^2]  − 2E[X]E[X] + E[X]^2 \\
+= E[X^2]  − 2E[X]^2 + E[X]^2 \\
+= E[X^2]-E[X]^2
+\end{align}
+$$
+Look how nice that is. Compare this majesty to the indecent array that presents itself without the \align{}
+
+$$
+V[X] = E[(X-E[X])^2] 
+= E[X^2 − 2XE[X] + E[X]^2] 
+= E[X]^2 − 2E[XE[X]] + E[E[X]^2] 
+= E[X^2]  − 2E[X]E[X] + E[X]^2 
+= E[X^2]  − 2E[X]^2 + E[X]^2 
+= E[X^2]-E[X]^2
+$$
+Hideous. 
