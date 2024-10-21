@@ -531,7 +531,7 @@ p1 <- dat |>
 p1
 ```
 
-[(Red line represents $E[Y | X = x]$, dots a sample from $f(x, y)$)]{.gray}
+[(Red line is $E[Y | X = x]$, dots are a sample from $f(x, y)$)]{.gray, .smaller}
 
 
 ## Illustration (2)
@@ -555,7 +555,7 @@ p <- dat |>
 p
 ```
 
-[(Red line represents $\E[Y | X = x]$, dots a sample from $f(x, y)$)]{.gray}
+[(Red line is $\E[Y | X = x]$, dots are a sample from $f(x, y)$)]{.gray .smaller}
 
 
 
