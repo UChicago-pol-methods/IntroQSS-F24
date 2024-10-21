@@ -22,12 +22,14 @@ knitr::opts_chunk$set(dev = "ragg_png")
 ```
 
 
-
-
 # Summarizing joint distributions {background-image="assets/joint_distribution.png" background-size="750px" background-repeat="repeat"}
 
 
 ## Motivation
+
+<!-- Define special characters for operators -->
+\def\E{{\textrm E}}
+\def\V{{\textrm V}}
 
 Suppose we have two RVs $X$ and $Y$ 
 
@@ -46,11 +48,11 @@ How can we summarize the relationship between $X$ and $Y$?
 
 ## Covariance  {.smaller}
 
-$$\text{Cov}[X, Y] = E\left[  (X - E[X])(Y - E[Y]) \right]$$ 
+$$\text{Cov}[X, Y] = \E\left[  (X - \E[X])(Y - \E[Y]) \right]$$ 
 
 . . . 
 
-Intuitively, "Does $X$ tend to be above $E[X]$ when $Y$ is above $E[Y]$? (And by how much?)"
+Intuitively, "Does $X$ tend to be above $\E[X]$ when $Y$ is above $\E[Y]$? (And by how much?)"
 
 . . . 
 
@@ -63,19 +65,19 @@ f(x,y) = \begin{cases}
 \end{cases}
 $$
 
-What is $E[X]$? What is $E[Y]$? 
+What is $\E[X]$? What is $\E[Y]$? 
 
 . . .
 
-Then compute expectation of $(X - E[X])(Y - E[Y])$ (function of two RVs) as above.
+Then compute expectation of $(X - \E[X])(Y - \E[Y])$ (function of two RVs) as above.
 
 
 ## Variance and covariance
 
 Compare: 
 
-\begin{align}\text{Cov}[X, Y] &= E\left[  \color{blue}{(X - E[X])}\color{orange}{(Y - E[Y])} \right] \\  
-\text{V}[X] &= E\left[  \color{blue}{(X - E[X])}\color{blue}{(X - E[X])} \right]\end{align}
+\begin{align}\text{Cov}[X, Y] &= \E\left[  \color{blue}{(X - \E[X])}\color{orange}{(Y - \E[Y])} \right] \\  
+\V[X] &= \E\left[  \color{blue}{(X - \E[X])}\color{blue}{(X - \E[X])} \right]\end{align}
 
 . . . 
 
@@ -87,7 +89,7 @@ Compare:
 
 Plot the points in $\text{Supp}[X, Y]$ on two axes with point size proportional to $f(x, y)$.
 
-Divide the $x, y$ plane into quadrants defined by $x = E[X]$ and $y = E[Y]$. 
+Divide the $x, y$ plane into quadrants defined by $x = \E[X]$ and $y = \E[Y]$. 
 
 ```{r}
 dat <- tibble(x = c(0, 1, 1), y = c(0, 0, 1), fxy = c(1/3, 1/6, 1/2))
@@ -113,9 +115,9 @@ p
 
 ## Geometric representation (2) {.smaller}
 
-For each point $(x, y) \in \text{Supp}[X, Y]$, create a rectangle with $(x,y)$ at one corner and $(E[X], E[Y])$ at the opposite corner.
+For each point $(x, y) \in \text{Supp}[X, Y]$, create a rectangle with $(x,y)$ at one corner and $(\E[X], \E[Y])$ at the opposite corner.
 
-Shade the rectangle green in quadrants I and III (where $(x - E[X])(y - E[X]) > 0$), otherwise red, with intensity proportional to $f(x,y)$.
+Shade the rectangle green in quadrants I and III (where $(x - \E[X])(y - \E[X]) > 0$), otherwise red, with intensity proportional to $f(x,y)$.
 
 Covariance (roughly) measures how much green vs red there is.
 
@@ -213,24 +215,24 @@ make_cov_plot(pmf)
 
 First formulation: 
 
-$$\text{Cov}[X, Y] = E\left[  (X - E[X])(Y - E[Y]) \right]$$ 
+$$\text{Cov}[X, Y] = \E\left[  (X - \E[X])(Y - \E[Y]) \right]$$ 
 
 . . . 
 
 As with variance, an alternative formulation: 
 
-$$\text{Cov}[X, Y] = E\left[XY\right] - E[X]E[Y]$$ 
+$$\text{Cov}[X, Y] = \E\left[XY\right] - \E[X]\E[Y]$$ 
 
 . . .
 
 Note: 
 
-- if $E[X] = E[Y] = 0$ (e.g. if recentered), both become $E[XY]$
+- if $\E[X] = \E[Y] = 0$ (e.g. if recentered), both are $\E[XY]$
 - geometrically, can think in terms of areas of rectangles
 
 
 
-## Geometry of $E[XY] - E[X]E[Y]$
+## Geometry of $\E[XY] - \E[X]\E[Y]$
 
 ::::{.columns}
 
@@ -256,6 +258,8 @@ p1
 ```
 
 
+[i.e. (1,1) and (3,3) equally likely]{.smaller}
+
 :::
 :::{.column column-width="50%"}
 ```{r}
@@ -278,12 +282,55 @@ p2
 
 ```
 
+[i.e. (1,3) and (3,1) equally likely]{.smaller}
+
 :::
 ::::
 
 
+## Geometry of $\E[X]\E[Y]$ 
 
-## Geometry of $E[XY] - E[X]E[Y]$ (2)
+::::{.columns}
+
+:::{.column column-width="50%"}
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-align: center
+
+exey_box <- tibble(x = c(0, 2, 2, 0, 0),
+                   y = c(0, 0, 2, 2, 0))
+p1 + 
+  geom_vline(xintercept = 2, lty = 2) + 
+  geom_hline(yintercept = 2, lty = 2) + 
+  geom_polygon(data = exey_box, fill = "gray", alpha = .5, show.legend = F)
+
+```
+
+
+:::
+:::{.column column-width="50%"}
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+#| fig-align: center
+
+p2 + 
+  geom_vline(xintercept = 2, lty = 2) + 
+  geom_hline(yintercept = 2, lty = 2) + 
+  geom_polygon(data = exey_box, fill = "gray", alpha = .5, show.legend = F)
+
+
+```
+
+:::
+::::
+
+[$\E[X]\E[Y]$ is the area below and to the left of the dashed lines]{.smaller}
+
+
+
+## Geometry of $\E[XY]$ 
 
 ::::{.columns}
 
@@ -320,15 +367,18 @@ p2 +
 :::
 ::::
 
+[$\E[XY]$ is the average of the two areas (given equal probability)]{.smaller}
+
+
 ## Linearity of expectations, but not variances 
 
-If $f$ is  a *linear function* or *linear operator*, then $f(x + y) = f(x) + f(y)$. (**Additivity** property.)
+If $g$ is  a *linear function* or *linear operator* or *linear map*, then $g(x + y) = g(x) + g(y)$. (**Additivity** property.) Examples?
 
 . . .
 
 <br>
 
-Recall linearity of expectations: $E[X + Y] = E[X] + E[Y]$. 
+Recall linearity of expectations: $\E[X + Y] = \E[X] + \E[Y]$. 
 
 . . . 
 
@@ -344,12 +394,12 @@ Why not?
 ### A different proof from A&R 2.2.3
 
 $$\begin{aligned}
-\text{Var}(X+Y) &= E[(X + Y - E[X + Y])^2] \\\
-&= E[(X - E[X] + Y - E[Y])^2] \\\
-&= E[(\tilde{X} + \tilde{Y})^2] \\\
-&= E[\tilde{X}^2 + \tilde{Y}^2 + 2 \tilde{X} \tilde{Y}] \\\
-&= E[\tilde{X}^2] + E[\tilde{Y}^2] + E[2 \tilde{X} \tilde{Y}] \\\
-&= E[(X - E[X])^2] + E[(Y - E[Y])^2] + 2E[(X - E[X])(Y - E[Y])] \\\
+\text{Var}(X+Y) &= \E[(X + Y - \E[X + Y])^2] \\\
+&= \E[(X - \E[X] + Y - \E[Y])^2] \\\
+&= \E[(w + z)^2] \\\
+&= \E[w^2 + z^2 + 2 w z] \\\
+&= \E[w^2] + \E[z^2] + \E[2 w z] \\\
+&= \E[(X - \E[X])^2] + \E[(Y - \E[Y])^2] + 2\E[(X - \E[X])(Y - \E[Y])] \\\
 &= \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X, Y)
 \end{aligned}$$
 
@@ -372,9 +422,9 @@ Prove it!
 ## Proof of scale-invariance of correlation  {.smaller}
 
 \begin{align}
-\text{Cov}[aX, bY] &= E[aX bY] - E[aX]E[bY] \\
-&= ab E[XY] - ab E[X]E[Y] \\
-&= ab (E[XY] - E[X]E[Y]) \\ 
+\text{Cov}[aX, bY] &= \E[aX bY] - \E[aX]\E[bY] \\
+&= ab \E[XY] - ab \E[X]\E[Y] \\
+&= ab (\E[XY] - \E[X]\E[Y]) \\ 
 &= ab \text{Cov}[X, Y] 
 \end{align}
 
@@ -401,7 +451,7 @@ So
 
 We spent time on **expectations**: 
 
-$$E[Y] = \sum_y y f(y).$$
+$$\E[Y] = \sum_y y f(y).$$
 
 . . . 
 
@@ -413,13 +463,55 @@ $$f_{Y|X}(y|x) = \frac{f(x, y)}{f_X(x)}$$
 
 Combining the two ideas, we get **conditional expectations**: 
 
-$$E[Y \mid X = x] = \sum_y y f_{Y|X}(y \mid x).$$
+$$\E[Y \mid X = x] = \sum_y y f_{Y|X}(y \mid x).$$
 
 i.e. the expectation of $Y$ at some $x$.
 
 
 ## Illustration 
 
+
+```{r, webgl = T}
+#| message: false
+#| output: false
+
+library(rgl)
+setupKnitr(autoprint = TRUE)
+
+dat <- expand_grid(x = seq(-10, 10, length = 300),
+                   y = seq(-10, 10, length = 300))
+
+dat |> 
+  mutate(z = mvtnorm::dmvnorm(as.matrix(dat))) -> datt
+
+
+Sigma <- cbind(c(1, .7), c(.7, 1))
+dat |> 
+  mutate(z = mvtnorm::dmvnorm(as.matrix(dat), sigma = Sigma)) -> datt2
+
+open3d()
+
+plot3d(datt2, col = "lightblue", alpha = .5, 
+       xlab = "x", ylab = "y", zlab = "f(x, y)", 
+       xlim = c(-3, 3), ylim = c(-3, 3),
+       aspect = c(1, 1, .5))
+planes3d(a = 1, b = 0, c = 0, d = -1, col = "red", alpha = .5)
+
+n <- 100
+y <- seq(-3, 3, length = n)
+x <- rep(1, length(y))
+z <- mvtnorm::dmvnorm(cbind(x, y), sigma = Sigma)
+lines3d(x = x, y = y, z = z, col = "black", lwd = 2)
+
+rgl.close()
+
+# numerically compute integral:
+fx <- sum(z)*(y[2] - y[1])
+
+```
+
+
+## Another illustration
 
 ```{r}
 #| fig-align: center
@@ -463,7 +555,7 @@ p <- dat |>
 p
 ```
 
-[(Red line represents $E[Y | X = x]$, dots a sample from $f(x, y)$)]{.gray}
+[(Red line represents $\E[Y | X = x]$, dots a sample from $f(x, y)$)]{.gray}
 
 
 
@@ -473,8 +565,8 @@ p
 
 Two formulations: 
 
-$$V[Y | X = x] = E[(Y - E[Y | X =x])^2 | X = x]$$
-$$V[Y | X = x] = E[Y^2 | X = x] - E[Y | X =x]^2$$
+$$\V[Y | X = x] = \E[(Y - \E[Y | X =x])^2 | X = x]$$
+$$\V[Y | X = x] = \E[Y^2 | X = x] - \E[Y | X =x]^2$$
 
 
 ```{r}
@@ -488,9 +580,9 @@ p1
 
 Two formulations: 
 
-$$V[Y | X = x] = E[(Y - E[Y | X =x])^2 | X = x]$$
+$$\V[Y | X = x] = \E[(Y - \E[Y | X =x])^2 | X = x]$$
 
-$$V[Y | X = x] = E[Y^2 | X = x] - E[Y | X =x]^2$$
+$$\V[Y | X = x] = \E[Y^2 | X = x] - \E[Y | X =x]^2$$
 
 ```{r, echo = F}
 #| fig-align: center
@@ -507,9 +599,9 @@ tibble(x = runif(n, min = 0, max = 2.75)) |>
 
 ## Conditional expectations vs Conditional expectation function (CEF) {.smaller}
 
-Conditional expectation $E[Y | X = x]$ is for a specific $x$.
+Conditional expectation $\E[Y | X = x]$ is for a specific $x$.
 
-Conditional expectation function (CEF) $E[Y | X]$ is for all $x$.
+Conditional expectation function (CEF) $\E[Y | X]$ is for all $x$.
 
 
 ```{r}
@@ -521,7 +613,7 @@ p1
 
 ## CEF as best predictor
 
-The CEF $E[Y | X]$ is the expectation of $Y$ at each $X$.
+The CEF $\E[Y | X]$ is the expectation of $Y$ at each $X$.
 
 . . .
 
@@ -533,26 +625,26 @@ So CEF is the best possible way to use $X$ to predict $Y$.  (See Theorem 2.2.20.
 
 . . . 
 
-**Multivariate generalization**: $E[Y \mid X_1, X_2, X_3, \ldots, X_n]$ is the best way to use $X_1, \ldots X_n$ to predict $Y$. 
+**Multivariate generalization**: $\E[Y \mid X_1, X_2, X_3, \ldots, X_n]$ is the best way to use $X_1, \ldots X_n$ to predict $Y$. 
 
 
 ## Law of iterated expectations {.smaller}
 
 For random variables $X$ and $Y$,
 
-$$E[Y] = E[E[Y | X]]$$
+$$\E[Y] = \E[\E[Y | X]]$$
 
 . . . 
 
-This means there are two ways to get $E[Y]$:
+This means there are two ways to get $\E[Y]$:
 
-- start with $f(y)$, take expectations: $E[Y] = \sum_y y f(y)$
+- start with $f(y)$, take expectations: $\E[Y] = \sum_y y f(y)$
 <!-- - start with $f(x, y)$, get $f_Y(y) = \sum_x f(x, y)$, take expectations: $E[Y] = \sum_y y f_Y(y)$ -->
-- start with $E[Y \mid X]$ and $f_X(x)$, take expectations: $E[Y] = \sum_x E[Y \mid X=x] f_X(x)$ 
+- start with $\E[Y \mid X]$ and $f_X(x)$, take expectations: $\E[Y] = \sum_x \E[Y \mid X=x] f_X(x)$ 
 
 . . . 
 
-In words: An unconditional average ($E[Y]$) can be represented as a weighted average of conditional expectations ($E[Y \mid X]$) with weights taken from the distribution of the variable conditioned on, i.e. $X$.
+In words: An unconditional average ($\E[Y]$) can be represented as a weighted average of conditional expectations ($\E[Y \mid X]$) with weights taken from the distribution of the variable conditioned on, i.e. $X$.
 
 . . .
 
@@ -566,13 +658,13 @@ Why would you want to do that?
 
 A population is 80% female and 20% male.
 
-The average age among females ([$E[Y | X = 1]$]{.gray}) is 25. The average age among males [$E[Y | X = 0]$]{.gray} is 20.
+The average age among females ([$\E[Y | X = 1]$]{.gray}) is 25. The average age among males [$\E[Y | X = 0]$]{.gray} is 20.
 
-What is the average age in the population [$E[Y]$]{.gray}?
+What is the average age in the population, [$\E[Y]$]{.gray}?
 
 . . .
 
-$$E[E[Y | X]] = .8 \times 25 + .2 \times 20 = 24$$
+$$\E[\E[Y | X]] = .8 \times 25 + .2 \times 20 = 24$$
 
 . . .
 
@@ -609,7 +701,7 @@ Suppose we want to measure the average effect of participating in a program (e.g
 
 . . . 
 
-Call $Y$ the [(unobservable)]{.gray} effect of the treatment. We want the **average treatment effect** (ATE), $E[Y]$.
+Call $Y$ the [(unobservable)]{.gray} effect of the treatment. We want the **average treatment effect** (ATE), $\E[Y]$.
 
 . . . 
 
@@ -617,28 +709,28 @@ Suppose that comparing participants and non-participants gives us a good estimat
 
 . . . 
 
-So we have $E[Y \mid X]$. 
+So we have $\E[Y \mid X]$. 
 
 . . .
 
-Now we just combine these estimates (by LIE): $E[Y] = E[E[Y \mid X]] = \sum_{x}  E[Y \mid X = x] f(x)$
+Now we just combine these estimates (by LIE): $\E[Y] = \E[\E[Y \mid X]] = \sum_{x}  \E[Y \mid X = x] f(x)$
 
 
 
 
 ## Law of total variance
 
-$$V[Y] = E[V[Y|X]] + V[E[Y|X]]$$
+$$\V[Y] = \E[\V[Y|X]] + \V[\E[Y|X]]$$
 
 . . . 
 
-In words, the variance of $Y$ can be **decomposed** into the expected conditional variance [($E[V[Y|X]]$)]{.gray} and the variance of the conditional expectation [($V[E[Y|X]]$)]{.gray}.
+In words, the variance of $Y$ can be **decomposed** into the expected conditional variance [($\E[\V[Y|X]]$)]{.gray} and the variance of the conditional expectation [($\V[\E[Y|X]]$)]{.gray}.
 
 . . . 
 
 Sometimes called "Ev(v)e's law" because 
 
-$$V[Y] = \color{red}{E}[\color{red}{V}[Y|X]] + \color{red}{V}[\color{red}{E}[Y|X]]$$
+$$\V[Y] = \color{red}{\E}[\color{red}{\V}[Y|X]] + \color{red}{\V}[\color{red}{\E}[Y|X]]$$
 
 ## Law of total variance (2)
 
@@ -658,14 +750,14 @@ Suppose we want to predict $Y$ using $X$, and we focus on a linear predictor, i.
 
 The best (minimum MSE) predictor satisfies
 
-$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \mathrm{E}\,[\left(Y - (a + bX)\right)^2]$$
+$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \E\,[\left(Y - (a + bX)\right)^2]$$
 
 . . . 
 
 The solution (see Theorem 2.2.21) is 
 
 - $\beta = \frac{\textrm{Cov}[X, Y]}{\textrm{V}[X]}$
-- $\alpha = \textrm{E}[Y] - \beta \textrm{E}[X]$ 
+- $\alpha = \E[Y] - \beta \E[X]$ 
 
 . . . 
 
@@ -680,7 +772,7 @@ So we could obtain the BLP from a joint PMF. (See homework.)
 :::{.column column-width="50%"}
 Above, we were looking for best linear predictor (BLP) of $Y$ as function of $X$: 
 
-$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \mathrm{E}\,[\left(Y - (a + bX)\right)^2]$$
+$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \E[\left(Y - (a + bX)\right)^2]$$
 
 :::
 
@@ -689,7 +781,7 @@ $$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \mathrm{E}\,[
 
 Same answer if you look for the best linear predictor of the CEF $E[Y | X]$:
 
-$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \mathrm{E}\,[\left(\mathrm{E}[Y|X] - (a + bX)\right)^2]$$
+$$(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \E[\left(\E[Y|X] - (a + bX)\right)^2]$$
 
 
 :::
