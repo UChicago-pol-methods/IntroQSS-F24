@@ -1,0 +1,178 @@
+---
+title: "Midterm Solutions"
+format: 
+  pdf:
+    include-in-header:
+      text: '\pagenumbering{gobble}'
+author: "Name: _______________________"
+---
+
+<!-- Define special characters for operators -->
+\def\E{{\textrm E}\,}
+\def\V{{\textrm V}\,}
+
+
+**Question 1: `R` code interpretation**
+
+Consider this `R` code.
+
+```{r}
+#| eval: true
+artist <- c("da vinci", "da vinci", "caravaggio", "delacroix", "da vinci")
+area <- c(5, 6, 9, 12, 8)
+rating <- c(7, 6, 10, 2, 5)
+```
+
+(1a) What is `mean(rating)`? 
+$$
+\frac{7+6+10+2+5}{5} = 6
+$$
+
+```{r}
+#check
+mean(rating)
+```
+
+
+\vspace{0.8in}
+
+(1b) What is `mean(rating[artist == "da vinci"])`?
+$$
+\frac{7+6+5}{3} = 6
+$$
+
+```{r}
+#check
+mean(rating[artist == "da vinci"])
+```
+
+\vspace{0.8in}
+
+(1c) What is `mean(rating[area > 8])`?
+$$
+\frac{10+2}{2} = 6
+$$
+
+```{r}
+#Check
+mean(rating[area > 8])
+```
+
+
+\vspace{0.5in}
+
+```{r}
+# From R help file: 
+# `sample` takes a sample of the specified `size` from the elements of `x` 
+# using either with or without replacement.
+samp <- sample(x = area, size = 20000, replace = T, prob = rep(1/5, 5))
+```
+
+(1d) What is `mean(samp)`, approximately?
+$$
+\frac{5+6+9+12+8}{5}=8
+$$
+Because the sampling is done with replacement, and because each element in the area vector is equally likely to be selected, `mean(samp)` should be approximately 8. 
+```{r}
+#check
+mean(samp)
+```
+
+\vspace{0.8in}
+
+\newpage
+
+**Question 2: Proof interpretation**
+
+The variance of a random variable $X$ is defined as  $\V[X] = \E\left[\left(X - \E[X]\right)^2\right]$. An alternative formula for variance is 
+$$\V[X] = \E[X^2] - \E[X]^2.$$
+Here is a proof:
+\begin{align}
+\V[X] &= \E\left[\left(X - \E[X]\right)^2\right] \tag{Step 1} \\
+   &= \E\left[X^2 - 2\E[X] X  + \E[X]^2 \right] \tag{Step 2} \\ 
+   &= \E[X^2] - \E\left[2\E[X] X \right] + \E\left[ \E[X]^2 \right] \tag{Step 3} \\
+   &= \E[X^2] - 2\E[X] \E[X] + \E\left[ \E[X]^2 \right] \tag{Step 4} \\
+   &= \E[X^2] - 2\E[X] \E[X] + \E[X]^2 \tag{Step 5} \\
+   &= \E[X^2] - \E[X]^2 \tag{Step 6} 
+\end{align}
+
+Explain what definition/property/mathematical operation is being used in each step of the proof.
+
+(2a) Step 1: Definition of Variance. 
+
+\vspace{.6in}
+
+(2b) Step 2: Expand the squared term. 
+
+\vspace{.6in}
+
+(2c) Step 3: Linearity of Expectations. 
+
+\vspace{.6in}
+
+(2d) Step 4: Linearity of Expectations (moving $2\E[X]$ outside of the expectations operator, because it is a constant)
+
+\vspace{.6in}
+
+(2e) Step 5: Expectation of a constant is a constant. (Could also say linearity of expectations, or moving a constant outside of the expectations operator.)
+
+\vspace{.6in}
+
+(2f) Step 6: Combine like terms. 
+
+\vspace{.6in}
+
+
+
+**Question 3: Joint distribution of two random variables**
+
+<!-- is this question already okay? --> 
+
+Consider the joint PMF of two random variables, $X$ and $Y$:
+
+| $x$   | $y$ | $f(x, y)$    |
+|:-----:|:-----:|:----------:|
+|   0   |   0    |    1/6    |
+|   1   |   0    |    1/3    |
+|   2   |   0    |    1/8    |
+|   2   |    1   |   3/8     |
+
+
+(3a) What is the marginal distribution of $X$, i.e. $f_X(x)$?
+
+| $x$   | $f_{X}(x)$  |
+|:-----:|:-----:|
+|   0   |  1/6  |       
+|   1   |  1/3  |       
+|   2   |  1/2  | 
+
+(3b) What is the expectation of $X$, i.e. $\E[X]$? 
+$$
+\E[X] = 0*\frac{1}{6}+1*\frac{1}{3}+2*\frac{1}{2}=\frac{4}{3}
+$$
+
+\vspace{1in}
+
+(3c) What is the variance of $X$, i.e. $\V[X]$? 
+
+Given $\V[X] = \E[X^2] - \E[X]^2$, 
+\begin{align}
+\V[X] &= \left(0^2*\frac{1}{6}+1^2*\frac{1}{3}+2^2*\frac{1}{2}\right) - \left(\frac{4}{3}\right)^2 \\
+&= \frac{7}{3} - \frac{16}{9} \\
+&= \frac{5}{9}
+\end{align}
+
+
+
+\vspace{1in}
+
+(3d) What is the conditional distribution of $Y$ given $X$, i.e. $f_{Y\mid X}(y \mid x)$?  
+
+
+| $x$   | $y$ | $f_{Y\mid X}(y \mid x)$  |
+|:-----:|:-----:|:----------:|
+|   0   |   0    |    1   |
+|   1   |   0    |    1   |
+|   2   |   0    |   1/4  | 
+|   2   |   1    |   3/4  |
+
