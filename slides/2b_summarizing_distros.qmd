@@ -531,7 +531,7 @@ p1 <- dat |>
 p1
 ```
 
-[(Red line is $E[Y | X = x]$, dots are a sample from $f(x, y)$)]{.gray, .smaller}
+(Red line is $E[Y | X = x]$, dots are a sample from $f(x, y)$)]{.gray .smaller}
 
 
 ## Illustration (2)
@@ -675,7 +675,19 @@ See homework for another example.
 ## LIE: another example
 
 ```{r, echo = F}
-p1
+n <- 2000
+tibble(x = runif(n, min = 0, max = 2.75)) |> 
+  mutate(mu = 3*x + 8*x^2 - 3*x^3,
+         y = rnorm(n, mean = mu, sd = 3)) |> 
+  # filter(x > 0 & x < 2.75) |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point(alpha = .5, size = 2) +
+  theme_bw() + 
+  geom_line(aes(y = mu), col = "red", lwd = 2) + 
+  coord_cartesian(ylim = c(-5, 25))
+
+#p1 + 
+ # coord_cartesian(ylim = c(-5, 25))
 ```
 
 
@@ -688,10 +700,12 @@ tibble(x = rnorm(n, mean = 3, sd = 1.5)) |>
   mutate(mu = 3*x + 8*x^2 - 3*x^3,
          y = rnorm(n, mean = mu, sd = 3)) |> 
   filter(x > 0 & x < 2.75) |> 
+  slice_sample(n = 2000) |> 
   ggplot(aes(x = x, y = y)) + 
   geom_point(alpha = .5, size = 2) +
   theme_bw() + 
-  geom_line(aes(y = mu), col = "red", lwd = 2)
+  geom_line(aes(y = mu), col = "red", lwd = 2) + 
+  coord_cartesian(ylim = c(-5, 25))
 ```
 
 
