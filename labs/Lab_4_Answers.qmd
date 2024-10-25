@@ -1,0 +1,92 @@
+---
+title: "Lab 4: More 'for' Loops, Sampling distribution of the Sample Mean"
+format: pdf
+editor: source
+---
+
+#Review: Distributions
+In the second lab, we discussed various kinds of distributions, including: the normal distribution, the uniform distribution, and the binomial distribution. There are many other kinds of distributions as well.
+
+Often, we are interested in estimating parameters of a population distribution, without knowing what the underlying population distribution is. What we have is a sample. The sample has its own distribution, apart from the population distribution. We can estimate sample statistics like the mean. 
+
+## Sampling Statistics
+We can take paramenters of sampling distributions. A common example is the mean. Frequently, we take a sample of the population and find the mean of the sample. 
+
+```{r}
+sample <- rnorm(100, mean = 100, sd = 15)
+mean(sample)
+```
+The sample mean is close to the mean of the population distribution. However, how are we justified in assuming that this is the case? That is, on what basis can we say that the sample mean is a good estimate of the population mean? 
+
+For one, we can prove that the expected value of the sample mean is the population mean. At the same time, it is quite clear that for a small enough sample, the sample mean may deviate from the population mean quite significantly. In this lab, we will get some of the intuition for this topic. 
+
+Consider the fact that the sample mean is a function of the random variable from which the sample is drawn. Therefore, the sample mean is itself a random variable with its own distribution! What will the distribution of the sample mean be?
+
+To start to answer this, consider the following scenario: what if we took many samples from the same population distribution and calculated the mean of each of the samples. Then, we could have the sampling distribution of the sample mean. 
+
+How would we do this in 'R'
+Step 1: take a sample from the normal distribution
+Step 2: calculate the mean of the sample
+Step 3: repeat this process many times, so that we have many sample means
+Step 4: represent graphically the sampling distribution of the sample mean
+
+#Example: Sampling Distribution of the Sample Mean of the Normal Distribution
+Problem: create a histogram showing the sampling distribution of the sample mean of the standard normal distribution with a based on 1000 samples.
+```{r}
+norm_means_storage <- rep(0, times = 1000) 
+
+for (i in 1:length(norm_means_storage)) {
+  sample_data <- rnorm(n = 10, mean = 0, sd = 1)  
+  norm_means_storage[i] <- mean(sample_data) 
+}
+
+hist(unif_means_storage)
+```
+NOTE: the sample size is different from the number of samples. Here, the sample size is only 10, but we take 1000 samples. How would changing these things affect our histogram?
+
+## Activity: 
+Now, do this yourself. Using the code template above, take sample means from various distributions, and plot the sampling distributions of the sample means. 
+
+## Uniform Distribution
+sample from a uniform distribution with a min of 0 and a max of 1
+```{r}
+unif_means_storage <- rep(0, times = 10000) 
+
+for (i in 1:length(unif_means_storage)) {
+  sample_data <- runif(n = 100, min = 0, max = 1)  
+  unif_means_storage[i] <- mean(sample_data) 
+}
+
+hist(unif_means_storage)
+```
+
+
+##Binomial Distribution
+sample from a binomial distribution, where the probability of success is 0.7 and the probability of failure is 0.3
+```{r}
+binom_means_storage <- rep(0, times = 10000) 
+
+for (i in 1:length(binom_means_storage)) {
+  sample_data <- rbinom(n = 1000, size = 1, prob = c(0.7))  
+  binom_means_storage[i] <- mean(sample_data) 
+}
+
+hist(binom_means_storage)
+
+rbinom_test <- rbinom(n = 1000, 5, prob = c(0.7))
+rbinom_test
+mean(rbinom_test)/5
+```
+
+##Unfair Die 
+Here, sample from a vector containing the numbers 1-6 where the probabilities of getting 1, 2, and 3 are each 0.1., the probability of getting a 4 and the probability of getting a 5 are each 0.2, and the probability of getting a 6 is 0.3
+```{r}
+die_means_storage <- rep(0, times = 100000) 
+
+for (i in 1:length(die_means_storage)) {
+  sample_data <- sample(x = 1:6, size = 10, replace = T, prob = c(0.1,0.1,0.1,0.2,0.2,0.3))  
+  die_means_storage[i] <- mean(sample_data) 
+}
+
+hist(die_means_storage)
+```
