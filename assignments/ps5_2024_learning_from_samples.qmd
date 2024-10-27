@@ -1,0 +1,192 @@
+---
+title: "Problem set 5: Learning from samples"
+author: "(Your name here)"
+subtitle: "Due November 4, 2024, at 10am"
+format: pdf
+---
+
+\def\E{{\textrm E}\,}
+\def\V{{\textrm V}\,}
+
+*\textsc{Note}: Start with the file `ps5_2024_learning_from_samples.qmd` (available from the github repository at <https://github.com/UChicago-pol-methods/IntroQSS-F24/tree/main/assignments>). Modify that file to include your answers. Make sure you can "render" the file (e.g. in RStudio by clicking on the `Render` button). Submit both the qmd file and the PDF via Canvas.* 
+
+**Question 1: Estimating the sample mean (theory)**
+
+(1a) Below is the proof of Theorem 3.2.4, "Sampling Variance of the Sample Mean", from Aronow & Miller: 
+
+\begin{align}
+\V\left[\overline{X}\right] &= \V\left[\frac{1}{n}\left(X_1 + X_2 + \ldots + X_n \right) \right]  \tag{Step 1} \\
+&= \frac{1}{n^2}\V[X_1 + X_2 + \ldots + X_n] \tag{Step 2} \\
+&= \frac{1}{n^2}(\V[X_1] + \V[X_2] + \ldots + \V[X_n])  \tag{Step 3}\\
+&= \frac{1}{n^2}(\V[X] + \V[X] + \ldots + \V[X])  \tag{Step 4} \\
+&= \frac{1}{n^2}n \V[X] \tag{Step 5}  \\
+&= \frac{\V[X]}{n}   \tag{Step 6}
+\end{align}
+
+Explain what property/definition/operation justifies each step in the proof.
+
+**Answer**: 
+
+- Step 1: 
+- Step 2:
+- Step 3:
+- Step 4:
+- Step 5:
+- Step 6:
+
+\vspace{.5in}
+
+Suppose the $n$ iid random variables $X_1, X_2, \ldots, X_n$ represent responses on a public opinion survey in a large country. Specifically, each variable is a randomly sampled citizen's response to a survey question in which the citizen was asked to give their satisfaction with government on a numerical scale where 0 is "totally dissatisfied", 100 is "totally satisfied", and 50 is "neither satisfied nor dissatisfied". 
+
+(1b) In words, what is $\overline{X}$ in this case? 
+
+**Answer**: 
+
+\vspace{.5in}
+
+(1c) In words, what does $E[\overline{X}] = E[X]$ mean in this case?
+
+**Answer**: 
+
+\vspace{.5in}
+
+(1d) In words, what does $\V[\overline{X}] = \frac{\V[X]}{n}$ mean in this case? 
+
+**Answer**: 
+
+\vspace{1in}
+
+
+
+**Question 2: Estimating the sample mean (simulation)**
+
+By running this code, you will load two variables (`aa_2012` and `env_2012`) into `R`'s memory and set a seed so that we get the same results from simulations:
+
+```{r}
+# make sure to run this code to get the data!
+data_location <- "https://github.com/UChicago-pol-methods/IntroQSS-F24/raw/main/data/"
+load(url(paste0(data_location, "CCES_variables_2012.RData")))
+set.seed(60637)
+```
+
+The 2012 Cooperative Congressional Election Survey asked respondents,
+
+> "Affirmative action programs give preference to racial minorities in employment and college admissions in order to correct for past discrimination. Do you support or oppose affirmative action?" 
+
+Response options were 
+
+- 1 Strongly support
+- 2 Somewhat support
+- 3 Somewhat oppose
+- 4 Strongly oppose
+
+The variable `aa_2012` contains responses to this question.
+
+The 2012 Cooperative Congressional Election Survey also asked respondents,
+
+> "Some people think it is important to protect the environment even if it costs some jobs or otherwise reduces our standard of living. Other people think that protecting the environment is not as important as maintaining jobs and our standard of living. Which is closer to the way you feel, or haven't you thought much about this?" 
+
+Response options were 
+
+- 1 Much more important to protect environment even if lose jobs
+- 2 Environment somewhat more important
+- 3 About the same
+- 4 Economy somewhat more important
+- 5 Much more important to protect jobs, even if environment worse
+
+The variable `env_2012` contains responses to this question.
+
+To start with, assume that the data contains the whole population of interest.
+
+
+(2a) Write code to draw a single sample of 100 responses to `aa_2012` (without replacement) and compute average opposition to affirmative action (on the 1-4 scale in the raw data) in this sample. 
+
+**Answer:** 
+```{r}
+# your code here
+```
+
+(2b) Use a for-loop to do the same thing 1000 times and store all of the results. That is, compute the sample mean 1000 times, each time drawing a different sample of 100 respondents (without replacement) and computing the mean, and store each of these sample means. Use `hist()` to make a histogram of the results, and use `abline()` to add a vertical line at the population mean.
+
+**Answer:** 
+```{r}
+# your code here
+```
+
+(2c) Use `var()` to compute the variance of your sample means. Compare this to the theoretical value given by Theorem 3.2.4 (which you explicated in question 1).
+
+**Answer**: 
+```{r}
+# your code here
+```
+
+
+
+\vspace{.5in}
+
+(2d) Repeat (2b), but now each of your samples should be size 500.
+
+**Answer**: 
+```{r}
+# your code here
+```
+
+
+\vspace{.5in}
+
+(2e) Repeat (2c) for your samples of size 500. That is, use `var()` to compute the variance of your sample means (with samples of size 500). Compare this to the theoretical value given by Theorem 3.2.4 (which you explicated in question 1).
+
+**Answer**: 
+```{r}
+# your code here
+```
+
+
+\vspace{.5in}
+
+(2f) The 9452 people who answered these two questions on the CCES do not constitute the entire population of interest (the US voting-age population); they are a sample from that population. Using all of the observations as your sample, and supposing this is an iid sample, what is our best guess of average opposition to affirmative action in the population? What is the (estimated) standard error of your estimate? 
+
+**Answer**: 
+```{r}
+# your code here
+```
+
+
+\vspace{1in}
+
+
+**Question 3: plug-in sample variance and covariance**
+
+
+(3a) Suppose that the first 100 responses to `env_2012` is your sample. Compute the sample variance both using the plug-in sample variance estimator (Definition 3.2.18 in Aronow & Miller) and using the `var()` function in `R` (which is the *unbiased sample variance*). Confirm that the difference between them matches theory. 
+
+**Answer:** 
+
+```{r}
+# your code here
+```
+
+
+(3b) Using the plug-in sample variance as a guide, write down the formula for plug-in sample covariance between two random variables $X$ and $Y$.
+
+**Answer:** 
+
+\vspace{.5in}
+
+(3c) Using `R`, compute the plug-in sample covariance between the first 100 observations of `aa_2012` and the first 100 observations of `env_2012`. Compare it to the covariance computed using `cov()`. Does the sign of the sample covariance make sense? 
+
+**Answer**: 
+
+```{r}
+# your code here
+```
+
+
+(3d) Suppose we want to summarize the relationship between `aa_2012` and `env_2012` in the US population using the whole sample (all 9452 observations). We focus on the **best linear predictor** (BLP) of `aa_2012` using `env_2012`. Compute the plug-in estimate of the BLP's slope coefficient ($\beta$). Compare it to the slope coefficient you get using `lm(aa_2012 ~ env_2012)`.
+
+**Answer**:
+
+```{r}
+# your code here
+```
+
