@@ -1,5 +1,5 @@
 ---
-title: "PLSC30500, Fall 2023"
+title: "PLSC30500, Fall 2024"
 subtitle: "Part 3. Learning from random samples (part a)"
 author: "Andy Eggers"
 format: 
@@ -28,8 +28,8 @@ knitr::opts_chunk$set(dev = "ragg_png")
 
 ## Motivation {.smaller}
 
-\def\E{{\textrm E}\,}
-\def\V{{\textrm V}\,}
+\def\E{{\textrm E}}
+\def\V{{\textrm V}}
 
 So far we have talked about
 
@@ -113,7 +113,7 @@ Usually the problem is "not identically distributed"
 
 **Definition 3.2.1** *Sample statistic* 
 
-For IID random variables $X_1, X_2, \ldots, X_n$, a *sample statistic* is a function of $X_1, X_2, \ldots, X_n$:
+For IID random variables $X_1, X_2, \ldots, X_n$, a *sample statistic* $T_{(n)}$ is a function of $X_1, X_2, \ldots, X_n$:
 
 $$T_{(n)} = h_{(n)}(X_1, X_2, \ldots, X_n)$$
 
@@ -131,7 +131,7 @@ Because sample statistics are function of random variables, they **are** random 
 
 
 
-## Sample mean {.smaller}
+## Sample mean
 
 For i.i.d. random variables $X_1, X_2, \ldots, X_n$, the *sample mean* is 
 
@@ -142,7 +142,7 @@ $$\overline X = \frac{X_1 + X_2 + \ldots + X_n}{n} = \frac{1}{n} \sum_{i = 1}^{n
 
 $\overline{X}$ is a RV (and a sample statistic). Let's summarize its distribution!
 
-. . . 
+## Expectation of the sample mean  
 
 Proof that $E[\overline{X}] = E[X]$ (Theorem 3.2.3):
 
@@ -154,13 +154,31 @@ Proof that $E[\overline{X}] = E[X]$ (Theorem 3.2.3):
 \end{align}
 
 
+## Illustration in `R`
+
+```{r}
+xs <- c(1,2,3)
+probs <- c(.2, .5, .3)
+# E[X], analytically
+sum(xs*probs)
+# E[X], numerically: mean of a large sample from f(x)
+mean(sample(x = xs, size = 10000, replace = T, prob = probs))
+# E[\overline{X}], numerically: mean of many sample means 
+storage <- rep(NA, 10000)
+for(i in 1:length(storage)){
+  storage[i] <- mean(sample(x = xs, size = 10, replace = T, prob = probs))
+}
+mean(storage)
+```
+
+
 ## Sampling variance of the sample mean
 
-Okay, so $E[\overline{X}] = E[X]$. What else can we say about its distribution? 
+Okay, so $\E[\overline{X}] = \E[X]$. What else can we say about its distribution? 
 
 . . . 
 
-How close will $\overline{X}$ be to $E[X]$? 
+How close will $\overline{X}$ be to $\E[X]$? 
 
 . . . 
 
@@ -168,16 +186,18 @@ One measure of potential (in)accuracy is $\V[\overline{X}]$.
 
 . . . 
 
-**Theorem 3.2.4** says $\V[\overline{X}] = \frac{V[X]}{n}.$ (See homework.)
+**Theorem 3.2.4** says $\V[\overline{X}] = \frac{\V[X]}{n}.$ (See homework.)
 
 . . . 
 
 What does this mean? 
 
+<!-- variance across the sample means. don't give away too much because it's in the homework.--> 
+
 
 ## Weak law of large numbers (WLLN) {.smaller}
 
-If $\E[\overline{X}] = E[X]$, and $\V[\overline{X}] = \frac{\V[X]}{n}$, then with large $n$ isn't $\overline{X}$ likely to give us something very close to $E[X]$? 
+If $\E[\overline{X}] = \E[X]$, and $\V[\overline{X}] = \frac{\V[X]}{n}$, then with large $n$ isn't $\overline{X}$ likely to give us something very close to $\E[X]$? 
 
 . . . 
 
@@ -190,7 +210,7 @@ Yes! That's what the **weak law of large numbers** says.
 
 $$\overline{X}_{(n)} \overset{p}{\to} \text{E}[X]$$
 
-(where $\overset{p}{\to}$ means "convergence in probability)
+(where $\overset{p}{\to}$ means "convergence in probability")
 
 . . . 
 
@@ -202,11 +222,22 @@ Usually you don't know $\E[X]$, but WLLN tells us that if $n$ is large then $\ov
 
 
 
-## WLLN illustration (1)
+## WLLN illustration (0)
+
+Bernoulli random variable, $p = 2/3$.
+
+<!-- Recall, $\overline{X}_{(n)}$ is the sample mean based on a sample of size $n$. -->
+
+If we take a large sample (e.g. $n = 1000$), we can show the sample mean at each value of $n$ from $20, 21, \ldots, 1000$.
+
+On the next slide we show the results of doing this once: 
 
 ```{r}
 I <- 500
-J <- 10000
+J <- 1000 # number of samples
+# js <- seq(20, J, by = 10)
+set.seed(123)
+
 expand_grid(i = 1:I,
             j = 1:J) |> 
   mutate(draw = sample(x = c(1,0), size = I*J, replace = T, prob = c(2/3, 1/3))) -> dat
@@ -214,7 +245,29 @@ expand_grid(i = 1:I,
 dat |> 
   group_by(i) |> 
   mutate(cm = cummean(draw)) -> datt
+```
 
+
+## WLLN illustration (1)
+
+```{r}
+datt |> 
+  filter(j > 20 & i == 1) |> 
+  filter(j %% 10 == 0) |> 
+  ggplot(aes(x = j, y = cm, group = i)) + 
+  geom_line(alpha = 1, col = "red") + 
+  theme_bw() + 
+  labs(x = "Sample size (n)", y = "Cumulative mean", title = "1 run (starting at n=20)") + 
+  coord_cartesian(ylim = c(.4, .9)) + 
+  geom_hline(yintercept = 2/3, lty = 2)
+```
+
+
+
+
+## WLLN illustration (2)
+
+```{r}
 datt |> 
   filter(j > 20 & i < 11) |> 
   filter(j %% 10 == 0) |> 
@@ -228,7 +281,7 @@ datt |>
 
 
 
-## WLLN illustration (2)
+## WLLN illustration (3)
 
 ```{r}
 datt |> 
@@ -244,7 +297,7 @@ datt |>
 
 
 
-## WLLN illustration (3)
+## WLLN illustration (4)
 
 ```{r}
 datt |> 
@@ -259,7 +312,7 @@ datt |>
 ```
 
 
-## WLLN illustration (4)
+## WLLN illustration (5)
 
 
 ```{r}
@@ -280,9 +333,49 @@ dattt |>
   theme_bw()
 ```
 
+## $\E[\overline{X}] = \E[X]$ illustration
+
+```{r}
+datt |> 
+  ungroup() |> 
+  group_by(j) |> 
+  mutate(ebarx = mean(cm)) |> 
+  ggplot(aes(x = j, y = ebarx)) + 
+  geom_line() + 
+  theme_bw() +
+  geom_hline(yintercept = 2/3, lty = 2) + 
+  expand_limits(y = c(.64, .7)) +
+  labs(x = "Sample size", y = "Mean of the 500 sample means")
+```
+
+## $\V[\overline{X}] = \V[X]/n$ illustration
+
+```{r}
+#| cache: true 
+# right
+datt |> 
+  ungroup() |> 
+  group_by(j) |> 
+  mutate(vbarx_Empirical = var(cm),
+         vbarx_Theoretical = (2/3)*(1 - 2/3)/j) |>
+  pivot_longer(cols = starts_with("vbarx_"), names_prefix = "vbarx_", names_to = "type", values_to = "vbarx") -> for_vbar_plot
+```
+
+
+```{r}
+for_vbar_plot |> 
+  ggplot(aes(x = j, y = vbarx, lty = type)) + 
+  geom_line() + 
+  scale_y_log10() +
+  theme_bw() +
+  labs(x = "Sample size", y = "Variance of the 500 sample means\n(log scale)",
+       lty = "")
+```
+
+
 ## Gambler's fallacy (optional)
 
-"WLLN says 'With more $n$, $\overline{X}$ should get closer and closer to $E[X]$.' The roulette ball hasn't landed on red in a while. By the WLLN, I know that the ball is now especially likely to land on red."
+"WLLN says 'With more $n$, $\overline{X}$ should get closer and closer to $\E[X]$.' The roulette ball hasn't landed on red in a while. By the WLLN, I know that the ball is now especially likely to land on red."
 
 What is the gambler missing?
 
@@ -301,7 +394,7 @@ But remember that
 
 - the conditional expectation function (CEF) is the best simple summary of one RV using others [(based on MSE)]{.gray}
 - the best linear predictor (BLP) of the CEF is a function of means, variances, and covariances 
-- means, variances, and covariances can all be expressed as population expectations ($\E[Y], \E[X], \E[X^2], E[XY]$)
+- means, variances, and covariances can all be expressed as population expectations ($\E[Y], \E[X], \E[X^2], \E[XY]$)
 - population expectations can be approximated by sample means ($\overline{Y}, \overline{X}, \overline{X^2}, \overline{XY}$), which get closer to the target with larger $n$
 
 . . . 
@@ -715,7 +808,7 @@ choose(n = 1000, k = 500)
 
 ## CLT intuition for Bernoulli RV (3) 
 
-Let's compute the number of ways to each number of heads between 0 and 1000 in 1000 tries:
+Let's compute the number of ways to get each number of heads between 0 and 1000 in 1000 tries:
 
 ```{r}
 #| echo: true
@@ -862,7 +955,7 @@ Intuition:
 
 ## When the CLT does not apply
 
-So when does the CLT **not** apply?
+<!-- So when does the CLT **not** apply? --> 
 
 . . .
 
