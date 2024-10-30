@@ -4,6 +4,7 @@ subtitle: "Part 3. Learning from random samples (part a)"
 author: "Andy Eggers"
 format: 
   revealjs:
+    html-math-method: mathjax
     smaller: false
     slide-number: c/t
     css: ["default", "uchicago_pol_meth.css"]
@@ -137,8 +138,7 @@ For i.i.d. random variables $X_1, X_2, \ldots, X_n$, the *sample mean* is
 
 $$\overline X = \frac{X_1 + X_2 + \ldots + X_n}{n} = \frac{1}{n} \sum_{i = 1}^{n} X_i$$
 
-. . . 
-
+. . .
 
 $\overline{X}$ is a RV (and a sample statistic). Let's summarize its distribution!
 
@@ -157,8 +157,14 @@ Proof that $E[\overline{X}] = E[X]$ (Theorem 3.2.3):
 ## Illustration in `R`
 
 ```{r}
+#| echo: true
+set.seed(122)
 xs <- c(1,2,3)
 probs <- c(.2, .5, .3)
+```
+
+```{r}
+#| echo: true
 # E[X], analytically
 sum(xs*probs)
 # E[X], numerically: mean of a large sample from f(x)
@@ -210,7 +216,7 @@ Yes! That's what the **weak law of large numbers** says.
 
 $$\overline{X}_{(n)} \overset{p}{\to} \text{E}[X]$$
 
-(where $\overset{p}{\to}$ means "convergence in probability")
+(where $\overset{p}{\to}$ means "convergence in probability", as $n$ increases)
 
 . . . 
 
@@ -230,7 +236,7 @@ Bernoulli random variable, $p = 2/3$.
 
 If we take a large sample (e.g. $n = 1000$), we can show the sample mean at each value of $n$ from $20, 21, \ldots, 1000$.
 
-On the next slide we show the results of doing this once: 
+On the next slides we show the results of doing this once, ten times, etc: 
 
 ```{r}
 I <- 500
@@ -440,7 +446,7 @@ Which one is $\overline{X}$?
 
 **Bias of an estimator**: The bias of an estimator $\hat{\theta}$ is $\E[\hat{\theta}] - \theta$. 
 
-If  $E[\hat{\theta}] = \theta$, $\hat{\theta}$ is **unbiased**.
+If  $\E[\hat{\theta}] = \theta$, $\hat{\theta}$ is **unbiased**.
 
 . . . 
 
@@ -488,7 +494,7 @@ So how can we estimate $\V[X]$ from the sample? **Plug-in principle!**
 
 **Estimator** in terms of sample means: $$\hat{\text{V}}_{\text{plug-in}}[X] = \overline{X^2} - \overline{X}^2$$
 
-[(Could also do $\overline{(X - \overline{X})}$)]{.gray}
+[Could also do $\overline{(X - \overline{X})^2}$.]{.gray}
 
 ## Plug-in principle: application (2) 
 
@@ -513,9 +519,17 @@ How would we compute the plug-in sample variance?
 mean(samp^2) - mean(samp)^2
 ```
 
+. . . 
+
+Or:
+
+```{r}
+#| echo: true
+mean((samp - mean(samp))^2)
+```
 
 
-## Plug-in sample variance: biased! {.smaller}
+## Plug-in sample variance: biased! 
 
 `R`'s `var()` function gives us a different answer: 
 
@@ -527,13 +541,35 @@ var(samp)                # R's var() function
 
 Why?  The plug-in sample variance estimator is biased (especially in small samples), and `R`'s `var()` function corrects for this.
 
-. . . 
+## Plug-in sample variance: why biased? 
 
 Why is it biased? 
 
 - In each sample, the plug-in sample variance is the average squared difference from the sample mean
 - In a "weird" sample, the sample mean is too high/low, so the average squared differences are too small  
 - This doesn't tend to cancel out: "weird-high" and "weird-low" both give answers that are too small (cf sample mean)
+
+## Example 
+
+Suppose Bernoulli RV $X$ with $p = 1/2$. 
+
+. . . 
+
+What is $\V[X]$?
+
+. . .
+
+Taking samples of size $n = 2$, the possible samples are:  
+
+| $(x_1, x_2)$ | $\overline{x}$  | $f(\overline{x})$ | $\overline{x^2} - \overline{x}^2$ |  
+|:--------------------: |:------:|:------------:|:------------:|
+| (0, 0)               |   0   |     1/4     |    0       |  
+|   (0,1) or (0,1)   |   1/2   |     1/2     |    1/4      |
+|   (1,1)              |   1   |     1/4     |     0       |
+  
+. . . 
+
+So $\E\left[\overline{X^2} - \overline{X}^2\right] = 1/8 < \V[X] = 1/4$. 
 
 
 ## Plug-in sample variance: how biased? {.smaller}
@@ -549,9 +585,9 @@ To see how biased (and how to correct):
 &= \frac{n - 1}{n} \V[X]
 \end{align}
 
-*Def: $V[\overline{X}] = E[\overline{X}^2] - E[\overline{X}]^2$
+*Def: $\V[\overline{X}] = \E[\overline{X}^2] - \E[\overline{X}]^2$
 
-
+<!-- so we get the target  minus the degree to which the sample mean is bouncing around --> 
 
 ## Illustration by simulation (optional)
 
@@ -591,7 +627,7 @@ expand_grid(size = c(2, 5, 10, 20, 50, 100, 500, 1000),
   theme_bw()
 ```
 
-
+<!-- 
 ## Intuition (optional) {.smaller}
 
 The variance measures the average squared difference from the mean: 
@@ -614,23 +650,23 @@ But we don't know $\E[X]$, so we estimate using $\overline{X}$.
 
 If our sample is unrepresentative in one direction, so is $\overline{X}$, making the variance appear smaller (by $\V[\overline{X}]$!). 
 
-
+--> 
 
 ## Variances to keep straight {.smaller}
 
 - $\V[X]$: the (population) variance of $X$
-- $\V[\overline{X}]$: the (sampling) variance of the sample mean
-- $\hat{\text{V}}_{\text{plug-in}}[X]$: the plug-in sample variance
-- $\hat{\text{V}}[X]$: the unbiased sample variance: $\frac{n}{n-1}\hat{\text{V}}_{\text{plug-in}}[X]$
+- $\V[\overline{X}]$: the (sampling) variance of the sample mean [($= \frac{\V[X]}{n}$)]{.gray}
+- $\hat{\V}_{\text{plug-in}}[X]$: the plug-in sample variance [($\overline{X^2} - \overline{X}^2$, a biased estimator of $\V[X]$)]{.gray}
+- $\hat{\V}[X]$: the sample variance  [($\frac{n}{n-1}\hat{\text{V}}_{\text{plug-in}}[X]$, an unbiased estimator of $\V[X]$)]{.gray}
 
 . . . 
 
 Common situation: 
 
-- we have a sample of size $n$
-- we want to estimate a sample mean $\overline{X}$
-- we want to describe the variance of the sample mean $\V[\overline{X}]$ (why?)
-- we don't know $\V[X]$, so we use $\hat{\text{V}}[X]/n$
+- we have a sample of size $n$: $\, x_1, x_2, \ldots, x_n$ 
+- we report the sample mean $\overline{X} = \frac{x_1 + x_2 + \ldots + x_n}{n}$
+- we want to report the variance of the sample mean, $\V[\overline{X}] = \frac{\V[X]}{n}$, but we don't know $\V[X]$ 
+- we instead report $\hat{\V}[X]/n$, an *estimator* of the variance of the sample mean 
 
 
 ## Plug-in principle wrap-up (for now)
@@ -649,7 +685,7 @@ What do we know about the sample mean $\overline{X}$ so far?
 
 - $\E[\overline{X}] = \E[X]$ [(unbiased)]{.gray}
 - $\V[\overline{X}] = \frac{\V[X]}{n}$ [(variance depends predictably on $\V[X]$ and $n$)]{.gray}
-- $\overline{X}_{(n)} \overset{p}{\to} \text{E}[X]$ [(WLLN)]{.gray}
+- $\overline{X}_{(n)} \overset{p}{\to} \E[X]$ [(WLLN)]{.gray}
 
 . . . 
 
@@ -657,7 +693,7 @@ Can we say more about $\overline{X}$'s sampling distribution?
 
 . . . 
 
-For example, what is $\text{Pr}\left[\overline{X} - E[X] > c\right]$ for some $c$? 
+For example, what is $\text{Pr}\left[\overline{X} - \E[X] > c\right]$ for some $c$? 
 
 
 
@@ -784,7 +820,7 @@ Suppose $n = 4$. How many ways are there to get a sample mean $\overline{X}$ of
 - 3/4
 - 4/4
 
-(Recall problem set 2!)
+<!-- (Recall problem set 2!) --> 
 
 
 

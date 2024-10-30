@@ -115,9 +115,9 @@ For example, the number of heads in two flips of a fair coin:
 
 $$
 f(x) = \begin{cases}
-1/4 & x = 0 \\\
-1/2 & x = 1 \\\
-1/4 & x = 2 \\\
+1/4 & x = 0 \\
+1/2 & x = 1 \\
+1/4 & x = 2 \\
 0 & \text{otherwise}
 \end{cases}
 $$
@@ -135,9 +135,9 @@ For the coin flip example,
 
 $$
 F(x) = \begin{cases}
-0 & x < 0 \\\
-1/4 & 0 \le x < 1 \\\
-3/4 & 1 \le x < 2 \\\
+0 & x < 0 \\
+1/4 & 0 \le x < 1 \\
+3/4 & 1 \le x < 2 \\
 1 & x \ge 2
 \end{cases}
 $$
@@ -396,12 +396,12 @@ Let $Y$ denote number of heads in **one** toss of a fair coin.
 
 $$
 f(x, y) = \begin{cases} 
-1/8 & x = 0, y = 0 \\\
-1/8 & x = 0, y = 1 \\\
-1/4 & x = 1, y = 0 \\\
-1/4 & x = 1, y = 1 \\\
-1/8 & x = 2, y = 0 \\\
-1/8 & x = 2, y = 1 \\\
+1/8 & x = 0, y = 0 \\
+1/8 & x = 0, y = 1 \\
+1/4 & x = 1, y = 0 \\
+1/4 & x = 1, y = 1 \\
+1/8 & x = 2, y = 0 \\
+1/8 & x = 2, y = 1 \\
 0 & \text{otherwise}
 \end{cases}
 $$
