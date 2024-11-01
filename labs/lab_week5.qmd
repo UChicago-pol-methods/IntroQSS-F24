@@ -1,0 +1,182 @@
+---
+title: "Week 5 Lab"
+format: pdf
+editor: source
+---
+## Addition: Distinguish between V[X] and V[\overline{X}]
+From Aronow and Miller: As $\overline{X}$ is a random variable, we can describe other features of its distribution. The variance of $\overline{X}$ is known as the sampling variance of the sample mean. Much as the variance characterizes the variability of a random variable X, the sampling variance of the sample mean characterizes how much variability we can expect in the sample mean across hypothetical draws of n observations.
+
+We can prove that 
+$$
+V[\overline{X}] = \frac{V[X]}{n}
+$$
+See Aronow and Miller. 
+
+Question: What is the difference between the variance of a random variable and the sampling variance of the sample mean?
+
+Simple answer: 
+$V[X]$ is the variance of the random variable X. It measures the variablity of individual observations. 
+$V[\overline{X}]$ is the variance of the sampling mean. It measures the variability of the sample mean across many draws. 
+
+Now, recall that the sample mean is a functional transformation. If X is a random variable, then g(X) is also a random variable. Therefore, the sample mean will have its own distribution. We can calculate the variance of this distribution. That is, we can calculate the variance of many hypothetically drawn sample means. This is what $V[\overline{X}]$ is. That is, the sampling variance of the sample mean. 
+
+## Data Frames in R
+
+A data frame is a two-dimensional, (table-like) data structure in R. So far, we have been working with a different data structure: vectors. We can think of a data frame as a collection of equal-length vectors: each column is a different vector. Data frames, however, can store different classes of objects. That is, one column could contain numerical data, one character data, etc. 
+
+There are multiple ways of importing datasets into R so we can work with them. For example, if you have CSV file (CSV stands for "comma separated values", and it is basically a giant Excel sheet), you can use the `read.csv()` command. Of course, you have to be careful in specifying the path to the specific file (which can be a big pain to learn when you are starting with R!).
+
+Various packages in `R` also contain data frames for illustrative purposes. We used the `iris` dataset in the first lab session, which is in the `tidyverse` package. For such datasets, we don't need to import them into our `R` session, because they are already loaded into R when we load the relevant package. As a result, we can just start working with them as needed.
+
+The dataset we will used today can also be found in an `r` package (called `car`), but to maintain consistency with the problem set code, I uploaded it to Github as an `RData` file.
+
+```{r}
+data_location <- "https://github.com/UChicago-pol-methods/IntroQSS-F24/raw/main/data/"
+load(url(paste0(data_location, "CCES_variables_2012.RData")))
+set.seed(60637)
+
+library(car)
+data("Prestige")
+```
+
+Let's look at what exactly we did here. First, we created an object to store the link to the class Github page (specifically, the page where all the data have been uploaded). The other important thing to note here is the `load()` function, which allows us to read an external file into the current `r` workspace.
+
+Finally, the file we read in is an 'Rdata' file, which is a file format in `r.` This file format allows us to store multiple objects in one file. When we load in the `RData` file provided by Andy, we  see that it loads in not just the dataset but also 2 vectors. These vectors correspond to vectors that are in the dataset you use in the problem set. As they are separate objects in your `R` workspace for the problem set, you can use them directly without having to reference the dataset.
+
+## Prestige Dataset
+
+Now, let's turn our attention to the dataset we are using today. It is called the "Prestige" dataset and is widely used for teaching linear regressions. The data is originally from 1970 and was used to measure how the perceived prestige of an occupation was related to how educated the employees in that industry were, how much money they made, and how many women worked in the industry.
+
+1.  **How many variables are in the dataset?**
+```{r}
+str(Prestige)
+ncol(Prestige)
+names(Prestige)
+```
+
+2.  **What does each row in the dataset represent?**
+
+3.  **How many observations are there?**
+```{r}
+nrow(Prestige)
+```
+
+4.  **What information do we have about each observation?**
+
+## Linear Regression
+
+A simple (perhaps too simplistic) way of defining a linear regression is as follows: when we linearly regress one variable (DV) on another (IV), we try to model the relationship between them as a straight line. In other words, we take the observed data and try to find a linear equation that best fits it ie minimises the sum of squared residuals .
+
+Let's connect this to the class discussion of best linear predictor (BLP) towards the end of week 4. Just as it sounds, BLP is the linear predictor that best models the linear relationship between 2 variables. And since at least the 1800s, we have known that minimising the sum of the squared residuals - also know as the ordinary least squares (OLS) - gives us the BLP in the single predictor case. In other words, we obtain the BLP of *Y* given *X* by calculating the model parameters that minimise the sum of the squared residuals.
+
+## Computation of BLP:
+
+Let's start by looking at what the linear model of a relationship between 2 variables would be. We know that some part of the IV would be explained by the DV and some of it would be explained by factors other than the DV. So our model will look as follows:
+
+$$
+\begin{equation}
+Y = g(X) = \alpha + \beta X
+\end{equation}
+$$
+
+Of course, there are all sorts of things we don't know about this relationship, and to account for that, we add an error term. So the general form of an equation actually is $Y=a+bX+e$. However, we can't know what the error is. You will learn a great deal more about the error term, and how to 'quantify your uncertainty', in Linear Models
+
+Here, $g(X)$ captures that *Y* is a function of *X.* What is the error in this context?
+
+$$
+\begin{align*}
+\epsilon &= Y - (a+bX) \\
+\implies \epsilon^2 &= [Y - (a+bX)]^2 \\
+\implies E[\epsilon^2] &= E[Y - (a+bX)]^2
+\end{align*}
+$$
+
+Since we are trying to minimise this error, we try to find values of $a$ and $b$ that would make the error as small as possible. Does the equation below look familiar?
+
+$$
+(\alpha, \beta) = \underset{(a,b) \in \mathbb{R}^2}{\arg\min} \, \mathrm{E}\,[\left(Y - (a + bX)\right)^2]
+$$
+
+To minimise a function, we differentiate it (with respect to what?) and set it to $0$ (and then solve for the parameter of interest). We will not make you take the partial derivatives in this class, but you will do it (probably) in Linear Models.
+$$
+\alpha = \textrm{E}[Y] - \beta \textrm{E}[X]
+$$
+$$
+\beta = \frac{\textrm{Cov}[X, Y]}{\textrm{V}[X]}
+$$
+Without getting into too much detail, let's try to intuitively understand these parameters.
+
+## Regression in R
+
+There is a base R function that performs the OLS regression for us. Pick any variable from the Prestige dataset and use `lm()` to determine the linear relationship between your chosen variable and the perceived prestige of the occupations.
+
+BEFORE you start, think about what the linear relationship should be. Then, get help from the function documentation to write your code.
+
+```{r}
+# your code here
+summary(lm(prestige~women, Prestige))
+```
+
+Fill out the equation below to get the functional form of this model:
+
+$$
+\text{prestige} = \beta_0+\beta_1()
+$$
+
+#### Interpretation:
+
+#### **2 notes here:**
+
+1.  If the variables you are using for your regression already exist as vectors in your environment, you don't have to call on the dataset to reference them.
+
+2.  Or, you can also save the variables as vectors to run the regression.
+
+3.  Or, you can also subset them out of the dataset using \$\$ signs.
+
+```{r}
+#your code here
+summary(lm(prestige$prestige~prestige$women))
+```
+
+## Preview of Things to Come
+
+#### Controls
+
+Of course, prestige is affected by a lot of other factors, many of which are in the dataset. So we can regress "prestige" on multiple variables at the same time to see how they impact it individually. For instance, the presence of women does have a notable impact on the perceived prestige of the job, but it is confounded by the income associated with it. It is possible that if an industry is female-dominated, then that industry might be perceived as less prestigious. But industries dominated by women also tend to industries that pay less, so we would want to isolate the impact of women's presence by **controlling** for income. Such a regression is called a **multiple linear regression.**
+
+$$
+\text{prestige} = \beta_0+\beta_1() + \beta_2()
+$$
+
+```{r}
+#your code here
+summary(lm(prestige~income + women, prestige))
+```
+
+### Interaction Terms
+
+You may also be interested in the **interaction** of 2 variables. This means that the effect of one DV on the IV may depend on the levels of another IV.
+
+For instance, you may think that the effect of income on prestige depends on the presence of women in the industry or vice versa. Income and the presence of women obviously impact the prestige of a job. But it is also additionally possible that jobs that have more women are seen as more prestigious when the income associated with these jobs is higher. Working as a secretary is not seen as that prestigious because a lot of secretaries are women AND it is not a highly-paid job. However, a lot of psychologists are women AND they get paid a lot, which would contribute to the perceived prestige of the job.
+
+```{r}
+summary(lm(prestige~income + women + income*women, prestige))
+```
+
+### Pretty Plots
+
+Finally, we can make pretty plots in `R` that model these relationships for us.
+
+```{r}
+library(ggplot2)
+plot_1 <- ggplot(data = prestige,
+                 mapping = aes(x = income,
+                               y = prestige,
+                               color = type)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(x = "Income", y="Prceived Prestige", "Type of Job") +
+  theme_minimal()
+  
+plot_1
+```
