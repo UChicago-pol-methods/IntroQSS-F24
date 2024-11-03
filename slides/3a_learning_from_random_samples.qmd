@@ -561,7 +561,7 @@ What is $\V[X]$?
 
 Taking samples of size $n = 2$, the possible samples are:  
 
-| $(x_1, x_2)$ | $\overline{x}$  | $f(\overline{x})$ | $\overline{x^2} - \overline{x}^2$ |  
+| $(x_1, x_2)$ | $\overline{x}$  | $f(\overline{x})$ | $\hat{V}_{\text{plug-in}}[X] = \overline{(x - \overline{x})^2}$   
 |:--------------------: |:------:|:------------:|:------------:|
 | (0, 0)               |   0   |     1/4     |    0       |  
 |   (0,1) or (0,1)   |   1/2   |     1/2     |    1/4      |
@@ -569,7 +569,7 @@ Taking samples of size $n = 2$, the possible samples are:
   
 . . . 
 
-So $\E\left[\overline{X^2} - \overline{X}^2\right] = 1/8 < \V[X] = 1/4$. 
+So $\E\left[\hat{V}_{\text{plug-in}}[X]\right] = 0 \times 1/2 + 1/4 \times 1/2 = 1/8 < \V[X] = 1/4$. 
 
 
 ## Plug-in sample variance: how biased? {.smaller}
@@ -677,6 +677,16 @@ Common situation:
 
 We'll do this again!
 
+## Estimand/estimator wrap-up{.smaller}
+
+| Estimand   | Estimator  | Biased? |   
+|:--------------------:|:------------:|:------------:|
+| Pop. mean, $\E[X]$   |   $\overline{X}$   |   $\E[\overline{X}] = \E[X]$  |  
+| Pop. variance, $\V[X]$   |  $\hat{\V}_{\text{plug-in}}[X]$  |  $\E\left[\hat{\V}_{\text{plug-in}}[X]\right] = \frac{n-1}{n} \V[X]$     |
+| Pop. variance, $\V[X]$   |  $\hat{\V}[X]$  |   $\E[\hat{\V}[X]] = \V[X]$ |
+| (Sampling) var. of sample mean, $\V[\overline{X}]$   |  $\frac{\hat{\V}[X]}{n}$  |   $\E[\hat{\V}[\overline{X}]] = \V[\overline{X}]$ |
+
+
 # Central limit theorem
 
 ## Recap/motivation
@@ -720,33 +730,58 @@ If we draw 10,000 samples of size $n$ and record the sample mean each time, what
 ## Case 1: $n = 2$
 
 ```{r, echo = F}
-x <- c(0, 1)
-ex = mean(x)
-vx <- mean((x - mean(x))^2)
+sample_and_plot <- function(n, point_size = 1, point_alpha = 1, line_alpha = 1, line_width = .5, seed = 123){
+  set.seed(seed)
+  m <- 10000
+  x <- c(0, 1)
+  samp_means <- replicate(m, mean(sample(x, size = n, replace = T)))
 
-n <- 2
-m <- 10000
-samp_means <- replicate(m, mean(sample(x, size = n, replace = T)))
+  tibble(sm = round(samp_means, 7)) |> 
+    count(sm) -> counts 
 
-tibble(sm = samp_means) |> 
-  count(sm) -> counts 
+  bind_rows(counts |> mutate(type = "tip"),
+            counts |> mutate(type = "base", n = 0)) -> for_plot 
 
-bind_rows(counts |> mutate(type = "tip"),
-          counts |> mutate(type = "base", n = 0)) -> for_plot 
-
-for_plot %>% 
-  ggplot(aes(x = sm, y = n)) + 
-  geom_point(data = filter(for_plot, type == "tip")) +
-  geom_line(aes(group = factor(sm))) +
-  labs(x = "Sample mean", y = "Frequency in 10,000 draws") + 
-  theme_bw()
+  for_plot %>% 
+    ggplot(aes(x = sm, y = n)) + 
+    geom_point(data = filter(for_plot, type == "tip"), alpha = point_alpha, size = point_size) +
+    geom_line(aes(group = factor(sm)), alpha = line_alpha, lwd = line_width) +
+    labs(x = "Sample mean", y = "Frequency in 10,000 draws", subtitle = str_c("Sample size: ", n)) + 
+    theme_bw() 
+}
+sample_and_plot(n = 2)
 ```
 
 
-
-## Case 2: $n = 1000$ 
+## Case 2: $n = 3$
 
 ```{r, echo = F}
+sample_and_plot(n = 3)
+```
+
+
+## Case 3: $n = 5$
+
+```{r, echo = F}
+sample_and_plot(n = 5)
+```
+
+## Case 4: $n = 1000$ 
+
+```{r, echo = F}
+sample_and_plot(n = 1000, point_size = .5, point_alpha = .5, line_alpha = .3, line_width = .1) + 
+  expand_limits(x = c(0, 1)) 
+```
+
+## Case 4: $n = 1000$ 
+
+```{r, echo = F}
+sample_and_plot(n = 1000)
+```
+
+
+```{r, echo = F}
+#| eval: false
 n <- 1000
 samp_means <- replicate(m, mean(sample(x, size = n, replace = T)))
 
@@ -770,26 +805,41 @@ tibble(sm = samp_means) |>
 
 Let $X_1, X_2, \ldots, X_n$ be i.i.d. random variables with finite $\E[X] = \mu$ and finite $\V[X] = \sigma^2 > 0$. Then 
 
-$$ \frac{\sqrt{n} \left(\overline{X} - \mu\right)}{\sigma} \overset{d}{\to} N(0, 1)$$ 
-
-where $N(m, s^2)$ is the normal distribution with mean $m$ and variance $s^2$.
-
-. . . 
-
-This means that for a large enough $n$, $\overline{X}$ should be distributed roughly $N(\mu, \sigma^2/n)$.
+$$ \overline{X}  \overset{d}{\to} N\left(\mu, \frac{\sigma^2}{n}\right),$$ 
+i.e. the normal distribution with mean $\mu$ and variance $\frac{\sigma^2}{n}$.
 
 . . . 
 
+You already know two parts of this, which are true for *any* sample size: 
 
-**Note**: 
+- $\E[\overline{X}] = \E[X] = \mu$
+- $\V[\overline{X}] = \frac{\V[X]}{n} = \frac{\sigma^2}{n}$
 
-- $\E[\overline{X}] = \E[X]$ and $\V[\overline{X}] = \V[X]/n$ are true for any sample size. 
-- The rest of the CLT (i.e. normality) applies **asymptotically** (i.e. large enough $n$).
+. . . 
+
+The new part is the *shape*: as $n$ goes to $\infty$, the sampling distribution of $\overline{X}_{(n)}$ becomes more normal. 
+
+
+
+## Central limit theorem (two forms) {.smaller}
+
+**Theorem 3.2.24** Central limit theorem
+
+Let $X_1, X_2, \ldots, X_n$ be i.i.d. random variables with finite $\E[X] = \mu$ and finite $\V[X] = \sigma^2 > 0$. Then 
+
+\begin{align}
+\frac{\sqrt{n} \left(\overline{X} - \mu\right)}{\sigma} &\overset{d}{\to} N(0, 1)  \tag{Version 1} \\
+\overline{X} - \mu &\overset{d}{\to}  \frac{\sigma}{\sqrt{n}} N(0, 1) \\
+\overline{X} - \mu &\overset{d}{\to}   N\left(0, \frac{\sigma^2}{n} \right) \\
+\overline{X} &\overset{d}{\to}   N\left(\mu, \frac{\sigma^2}{n} \right)  \tag{Version 2}
+\end{align}
+
 
 ## Illustration using above example
 
 ```{r, echo = F, cache = T}
-
+ex <- .5
+vx <- .5^2
 expand_grid(n = c(3, 10, 20, 100, 1000, 2000),
             rep = 1:10000) |> 
   mutate(samp = map(n, sample, x = c(0, 1), replace = T),
@@ -989,16 +1039,66 @@ Intuition:
 - we get normal sampling distribution of $\hat{\theta}$ if small discrepancies in CDF produce small deviations $\hat{\theta} - \theta$, large discrep. produce large $\hat{\theta} - \theta$
 
 
-## When the CLT does not apply
+## When the CLT does not apply {.smaller}
 
 <!-- So when does the CLT **not** apply? --> 
+. . . 
 
-. . .
+Some practically irrelevant exceptions implied by the CLT theorem statement: 
 
-Some examples: 
+Sample mean of $X$ when 
 
-- mode of a discrete RV that takes on few values (e.g. Bernoulli)
-- mode or other quantile of a discrete RV that takes on few values
+- $\E[X] = \infty$, e.g. [the St Petersburg paradox](https://en.wikipedia.org/wiki/St._Petersburg_paradox)
+- $\V[X] = 0$
+- non-iid sampling that eventually leads to sampling one person over and over
+
+. . . 
+
+More practically relevant exceptions:
+
+- mode of a discrete RV
+- median or other *quantile* of a discrete RV 
+
+## No CLT here!
+
+```{r, echo = F, cache = T, fig.height = 6}
+the_mode <- function(x){
+  names(sort(table(x), decreasing = T))[1] |> as.numeric()
+}
+
+expand_grid(n = c(3, 10, 20, 100, 1000, 2000),
+            rep = 1:10000) |> 
+  mutate(stat = map_dbl(n, ~the_mode(sample(x = c(0,1), size = .x, replace = T, prob = c(.5, .5))))) -> dat
+
+plot_function_mode <- function(dat, title = "X is Normal"){
+  
+  dat |> 
+    mutate(facet_labs = fct_reorder(str_c("n = ", n), n)) |> 
+    ggplot(aes(x = stat)) +
+    geom_histogram() + 
+    facet_wrap(vars(facet_labs)) + 
+    labs(x = "Sample mode", y = "Density", title = title)
+}
+
+plot_function_mode(dat, title = "Sample mode of X, which is Bernoulli w. p = .5")
+```
+
+## No CLT here either!
+
+```{r}
+k <- 10
+expand_grid(n = c(3, 11, 21, 101, 1001, 2001),
+            rep = 1:10000) |> 
+  mutate(stat = map_dbl(n, ~median(sample(x = 1:k, size = .x, replace = T, prob = rep(1/k, k))))) -> dat
+
+dat |> 
+  mutate(facet_labs = fct_reorder(str_c("n = ", n), n)) |> 
+  ggplot(aes(x = stat)) +
+  geom_histogram(breaks = seq(.75, 10.25, by = .5)) + 
+  facet_wrap(vars(facet_labs)) + 
+  labs(x = "Sample median", y = "Density", title = "Sample median of X, which is uniform over integers 1-10")
+```
+
 
 
 <!-- could make a picture here: original distribution, sampling distribution of mode --> 
