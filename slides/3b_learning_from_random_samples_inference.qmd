@@ -1,5 +1,5 @@
 ---
-title: "PLSC30500, Fall 2023"
+title: "PLSC30500, Fall 2024"
 subtitle: "Part 3. Learning from random samples (part b)"
 author: "Andy Eggers"
 format: 
@@ -8,8 +8,9 @@ format:
     slide-number: c/t
     css: ["default", "uchicago_pol_meth.css"]
     theme: simple
-    echo: false
     embed-resources: true
+    echo: false
+    html-math-method: mathjax
 ---
 
 
