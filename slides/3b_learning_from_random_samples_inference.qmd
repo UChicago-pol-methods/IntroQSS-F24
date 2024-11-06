@@ -68,29 +68,92 @@ norm_tail_plot <- function(lower = NULL, upper = NULL, inner = NULL){
 ```
 
 
-
-
-# Confidence intervals {background-image="assets/confidence.png" background-size="400px" background-repeat="repeat"}
-
-<!-- Across many tests (either with one value of theta or many), the CI contains the true value 95 of the time --> 
-
 ## Recapping  {.smaller}
 
 
-\def\E{{\textrm E}\,}
-\def\V{{\textrm V}\,}
+\def\E{{\textrm E}}
+\def\V{{\textrm V}}
 
 
 Say our **estimand** $\theta$ is a population mean, i.e. $\E[X]$
 
 . . . 
 
-We have a **plug-in estimator** $\hat{\theta}$, the sample mean $\overline{X}$.
+We have a **plug-in estimator** $\hat{\theta}$, the sample mean $\overline{X}_{(n)}$.
 
 . . . 
 
-It's unbiased: $\E[\overline{X}] = \E[X]$ [(more generally $\E[\hat{\theta}] = \theta$)]{.gray}.
+$\overline{X}$ has a **sampling distribution**. What do we know about it? 
 
+. . . 
+
+- centered on $\E[X]$, i.e. **unbiased**: $\E[\overline{X}] = \E[X]$
+- variance is $\V[X]/n$, which we can approximate with $\hat{V}[X]/n$
+- by CLT, **asymptotically normal**
+
+. . . 
+
+What can we do with this knowledge? 
+
+## All-knowing perspective 
+
+Suppose we knew $\E[X]$ and $\V[X]$. 
+
+. . . 
+
+Then we know the *asymptotic* sampling distribution of $\overline{X}$, i.e. $N\left(\E[X], \frac{\V[X]}{n}\right)$. 
+
+. . . 
+
+We could then compute, e.g. the probability of observing a sample mean below 2 if $\E[X] = 2.104$, $\V[X] = 4.63$, and $n = 198$. 
+
+. . . 
+
+```{r}
+#| echo: true
+pnorm(q = 2, mean = 2.104, sd = sqrt(4.63/198))
+```
+
+. . . 
+
+Similar if we only knew $\E[X]$ but not $\V[X]$.
+
+## The researcher's perspective
+
+But we don't know $\E[X]$ (that's why we're doing research). 
+
+. . . 
+
+We have an estimate $\overline{X}$, and we can estimate $\V[X]$ from the sample. What more can we say about $\E[X]$?  
+
+. . . 
+
+Reporting $\hat{\sigma}[X] = \sqrt{\frac{\hat{\V}[X]}{n}}$, the **standard error**, is a start.
+
+. . . 
+
+Approaches we will take: 
+
+- what is an interval centered on $\overline{X}$ that will contain $\E[X]$ in at least 95% of samples? (**confidence interval**)
+- suppose $\E[X] = c$. what is the probability of observing $\overline{X}$ at least as far from $c$ as what we observed? (**p-value**) 
+
+## The researcher's perspective (2)
+
+Generally, these tools of statistical inference require 
+
+- having a plug-in estimator for $\theta$, i.e. $\hat{\theta}$ 
+- having a plug-in estimator for $\V[\hat{\theta}]$, i.e. $\hat{\V}[\hat{\theta}]$
+- conditions for approximately normal sampling distribution of $\hat{\theta}$
+    - "mild regularity conditions"
+    - "large" $n$ 
+
+. . . 
+
+Does not require anything else about the underlying data (e.g. normality). 
+
+$\implies$ "agnostic statistics".
+
+<!-- 
 . . . 
 
 We have an unbiased estimator of $\V[\hat{\theta}]$, written $\hat{\V}[\hat{\theta}]$: $\frac{\hat{\V}[X]}{n}$.
@@ -107,15 +170,23 @@ So we know
 - spread (variance),
 - and shape of the **sampling distribution** of $\hat{\theta}$
 
-That's quite a lot! [(We also know shape of any plug-in estimator under "mild regularity conditions"; can get location and spread.)]{.gray}
+That's quite a lot! [(We also know approximate shape of any plug-in estimator under "mild regularity conditions"; can get location and spread.)]{.gray}
+--> 
+
+
+
+
+# Confidence intervals {background-image="assets/confidence.png" background-size="400px" background-repeat="repeat"}
+
+<!-- Across many tests (either with one value of theta or many), the CI contains the true value 95 of the time --> 
 
 
 ## Confidence interval motivation {.smaller}
 
 Could we specify a range that is likely (e.g. 95% likely) to include $\theta$? 
 
-- **Frequentist interpretation**: a range that would include $\theta$ in at least 95% of samples
-- **Bayesian interpretation**: a range that includes $\theta$ with at least 95% probability
+- **Frequentist interpretation**: 95% of the time we construct such a range from a sample, it will include $\theta$
+- **Bayesian interpretation**: I believe with 95% certainty that this range includes $\theta$ 
 
 That is the goal of constructing a **confidence interval**.
 
@@ -123,13 +194,15 @@ That is the goal of constructing a **confidence interval**.
 
 <br>
 
-Lazy confidence intervals:
+Lazy confidence intervals that are *certain* to include $\theta$:
 
 - for a proportion: $[0, 1]$
 - for GDP per capita: $[0, \infty]$
 - for average growth in income: $[-\infty, \infty]$
 
-Can we make them smaller?
+. . .
+ 
+We seek smaller ones that are *likely* to include $\theta$. 
 
 ## Confidence interval definition
 
@@ -151,7 +224,7 @@ In the frequentist view, $\theta$ is fixed and $CI$ is the random variable; the 
 
 
 :::{.column column-width="50%"}
-Suppose we know that $\hat{\theta}$ is distributed normally with mean $\theta$ and variance $\sigma^2$ (i.e. $N(\theta, \sigma)$.
+Suppose we know that $\hat{\theta}$ is distributed normally with mean $\theta$ and variance $\sigma^2$ (i.e. $N(\theta, \sigma^2)$.
 
 
 For now, suppose we know $\theta$. [(Remember, in real life we don't.)]{.gray}
@@ -329,7 +402,7 @@ Does your CI include $4$ (the population mean)?
 #| echo: true
 samp <- rnorm(n = 400, mean = 4, sd = 2)
 hat_theta <- mean(samp)
-hat_sigma <- sd(samp)/sqrt(400)
+hat_sigma <- sd(samp)/sqrt(400)  # = sqrt(var(samp)/400)
 # lower bound
 hat_theta - 1.64*hat_sigma
 # upper bound
@@ -406,12 +479,26 @@ As a **frequentist** concept, the confidence interval is about a long-run averag
 
 . . . 
 
-What about in a particular case? Can I say, "The probability that this CI contains $\theta$ is .95"?
+Recall, for a valid 95\% CI $\text{Pr}(\theta \in \text{CI}) = 95\%$.  
+
+. . . 
+
+$\theta$ is not a random variable; this is a probability statement about the frequency of the CI including $\theta$, not your beliefs about where $\theta$ is.
+
+. . . 
+
+But in the absence of other information, a Bayesian would say "There is a 95% probability that $\theta$ is in this CI."
+
+
+
+<!--
+
+What about in a particular case? Can I say, "The probability that $\theta$ is in this CI is .95"?
 
 . . .
 
-- Strict frequentist says "**NO.** $\theta$ is either in this CI or it isn't. Probability is for long-run averages, not your beliefs."
-- I (not a strict frequentist) say, "It's OK to describe beliefs with probability. 95% of my CIs contain $\theta$, so $\text{Pr}(\text{this CI contains } \theta) \approx .95$."
+- Strict frequentist says "**NO.** $\theta$ is not random; it is in this CI or it isn't. Probability is not for your beliefs."
+- I (not a strict frequentist) say, "It's OK to describe beliefs with probability. 95% of my CIs contain $\theta$, so $\text{Pr}(\theta \in \text{this CI}) \approx .95$." --><!-- assuming you don't know anything else --> 
 
 
 # Hypothesis testing and p-values {background-image="assets/sherlock_nyt.png" background-size="600px" background-position="right"}
@@ -556,7 +643,8 @@ norm_tail_plot(inner = c(-.5, 1.1)) +
 
 Lower one-tailed p-value: 
 
-$$\text{Pr}[\hat{\theta} \leq \hat{\theta}^* \mid \theta = \theta_0]$$
+$$\text{Pr}[\hat{\theta} \leq \hat{\theta}^*] \, \, \text{assuming} \,\, \theta = \theta_0$$
+i.e. "under the null".
 
 :::
 
@@ -583,9 +671,12 @@ norm_tail_plot(lower = c(-1.2)) +
 ::::{.columns}
 :::{.column column-width="60%"}
 
+
 Upper one-tailed p-value: 
 
-$$\text{Pr}[\hat{\theta} \geq \hat{\theta}^* \mid \theta = \theta_0]$$
+$$\text{Pr}[\hat{\theta} \geq \hat{\theta}^*] \, \, \text{assuming} \,\, \theta = \theta_0$$
+i.e. "under the null".
+
 
 :::
 
@@ -611,7 +702,11 @@ norm_tail_plot(upper = c(1.2)) +
 
 ## The two-tailed $p$-value
 
-Two-tailed p-value: $\text{Pr}\left[\lvert\hat{\theta} - \theta_0\rvert \geq \lvert\hat{\theta}^* - \theta_0\rvert \bigm| \theta = \theta_0\right]$
+Two-tailed p-value: 
+$\text{Pr}\left[\lvert\hat{\theta} - \theta_0\rvert \geq \lvert\hat{\theta}^* - \theta_0\rvert \right]$ assuming $\theta = \theta_0$, i.e. "under the null".
+
+
+<!-- $\text{Pr}\left[\lvert\hat{\theta} - \theta_0\rvert \geq \lvert\hat{\theta}^* - \theta_0\rvert \bigm| \theta = \theta_0\right]$--> 
 
 ```{r}
 #| fig-width: 4
@@ -776,7 +871,7 @@ In principle, both interesting. One-tailed especially relevant if the null hypot
 
 <br> 
 
-In practice, always use two-tailed because of the way $p$-values are used in testing
+In practice, we only use one-tailed tests when the test is *pre-registered*. Otherwise two-tailed to be conservative, given the way $p$-values are used in testing.
 
 
 ## Null hypothesis significance testing (NHST)  {.smaller}
@@ -806,13 +901,13 @@ In this context, one-tailed p-values are seen as cheating.
 
 ## Interpretation of p-values  {.smaller}
 
-> Intuitively, a low $p$-value means "if the null hypothesis (that $\theta = \theta_0$) were true, we would infrequently encounter a result as extreme as the one that we saw. Therefore, if we *reject* the null hypothesis (that is, if we conclude that $\theta \neq \theta_0$) based solely on how extreme the result is, then that decision will be a mistake either infrequently (if $\theta = \theta_0$) or never (if $\theta \neq \theta_0$)." (Aronow & Miler, p. 128)
+> Intuitively, a low $p$-value means "if the null hypothesis (that $\theta = \theta_0$) were true, we would infrequently encounter a result as extreme as the one that we saw. Therefore, if we *reject* the null hypothesis (that is, if we conclude that $\theta \neq \theta_0$) based solely on how extreme the result is, then that decision will be a mistake either infrequently (if $\theta = \theta_0$) or never (if $\theta \neq \theta_0$)." (Aronow & Miller, p. 128)
 
 . . .
 
 <br>
 
-So how often will it be a mistake? i.e. what is $\text{Pr}[\theta = \theta_0 \mid \text{reject}]$?
+So how often will it be a mistake? i.e. what is $\text{Pr}[\theta = \theta_0 \mid \text{reject}]$ (shifting to Bayesian perspective)?
 
 . . . 
 
@@ -870,7 +965,7 @@ Then $5/10 = .5$ of the rejections were mistakes.
 
 ## What is going on (2)?  {.smaller}
 
-> Intuitively, ... "if we *reject* the null hypothesis...based solely on how extreme the result is, then **that decision** will be a mistake either *infrequently* (if $\theta = \theta_0$) or *never* (if $\theta \neq \theta_0$)." (Aronow & Miler, p. 128; emphasis added)
+> Intuitively, ... "if we *reject* the null hypothesis...based solely on how extreme the result is, then **that decision** will be a mistake either *infrequently* (if $\theta = \theta_0$) or *never* (if $\theta \neq \theta_0$)." (Aronow & Miller, p. 128; emphasis added)
 
 <br>
 
