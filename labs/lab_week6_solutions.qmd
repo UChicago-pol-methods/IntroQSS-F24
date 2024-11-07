@@ -1,0 +1,184 @@
+---
+title: "Week 6: Lab Solutions"
+format: html
+editor: visual
+---
+
+## Problem Set Skills
+This Problem Set does not require any code that you have not learned in the lab and in the class. However, the coding tasks are more demanding than those on previous problem sets. Let us therefore conduct an exercise that is similar to the questions on the problem set. 
+
+### Sketching out the Code
+
+*Suppose you have the following task: From the `iris` dataset, generate 100 samples each containing 50 observations. Calculate the mean of each sample and store the means together in one vector. Then calculate the mean of these sample means and generate a histogram for the same.*
+
+This is a big, computationally-challenging task. The key, of course, is to break it down into smaller tasks. Consider what you are being asked, isolate each step, and figure out what the code is for each step. 
+
+1.  
+
+### Coding: Sampling from a Dataset
+It is usually best to start by looking at the dataset from which you are sampling. 
+```{r}
+data(iris)
+head(iris)
+```
+
+Look at the code below:
+
+```{r}
+samp <- sample(1:nrow(iris), size = 50, replace = TRUE)
+print(new_samp)
+```
+
+Is the output what you expected? 
+
+What do you think the output is? 
+
+What do we need to modify here to get closer to the desired output?
+
+Let's make those modifications. Recall that we have previously used brackets to extract quantities from datasets. 
+For instance. 
+
+```{r}
+iris["Sepal.Length"]
+```
+
+We can, likewise, use them to modify what we have extracted
+```{r}
+iris["Sepal.Length.Corrected"] <- iris["Sepal.Length"] - 1
+```
+
+
+In a similar way, we can use brackets to extract random samples from a dataset, as opposed to particular columns. 
+```{r}
+new_samp <- iris[sample(1:nrow(iris), size = 50)]
+print(new_samp)
+```
+
+What went wrong here? What did we specify about the sampling? What is still missing?
+HINT: In this case, the error message has the virtue of being informative. (recall that data frames are rectangular)  
+```{r}
+new_samp <- iris[sample(1:nrow(iris), size = 50),]
+print(new_samp)
+```
+
+Now that we have the sampling working as intended, let's move on to the next step.
+
+1.  How many samples do you need?
+2.  You are performing the same task on all the samples. What programming tool should we use for such tasks?
+
+```{r}
+m<-100
+means_vec <- rep(NA, m)
+
+for (i in 1:m){
+  new_samp <- iris[sample(1:nrow(iris), size = 50),]
+  means_vec[i] <- mean(new_samp$Petal.Length)
+}
+print(means_vec)
+```
+
+Now, we just need to calculate and display the mean of the sample means.
+
+```{r}
+mean(means_vec)
+```
+
+```{r}
+hist(means_vec, breaks=30)
+```
+
+Suppose now that you have the same task as above, but now you need to calculate the sample means for only observations within the sample that are of species "setosa". Without making too many modifications to the code above, how can you incorporate that detail?
+
+```{r}
+m<-100
+means_vec <- rep(NA, m)
+
+for (i in 1:m){
+  new_samp <- iris[sample(1:nrow(iris), size = 50),]
+  means_vec[i] <- mean(new_samp$Petal.Length[new_samp$Species=="setosa"])
+}
+print(means_vec)
+```
+
+Look again at the entire dataset. Calculate the mean petal length for setosa flowers that have petals of width less that 0.5 units. 
+
+What is this task asking you to do that the previous one wasn't?
+
+```{r}
+mean(iris$Petal.Length[iris$Species == "setosa" & iris$Petal.Width < 0.5])
+```
+
+What do you notice about the change in value here? It unsurprisingly seems like there is a correlation between petal length and petal width. if we regress the petal length on petal width, how could we report only the regression coefficient?
+
+```{r}
+summary(lm(iris$Petal.Length~iris$Petal.Width))
+```
+
+
+Also using brackets, you can extract just the regression coefficient
+```{r}
+coef(lm(iris$Petal.Length~iris$Petal.Width))[2]
+```
+
+
+## Estimatands Through Estimates Via Estimators: The metaphysics of statistics 
+
+We are sampling from an underlying population which we do not know, but which we model as a random variable with some distribution. This population distribution has an expected value and a variance. Both of these quantities are purely hypothetical. 
+
+The actual sample statistic, however, is calculated with numerical data; that is, actual numbers. Moreover, the sample statistic is itself a number. It is not a random variable. It does not vary at all. It is not hypothetical, but actual. 
+
+How, therefore, do we get from the crude empirics of sample means calculated on numerical data to the Platonic realm of expectations, which are abstract quantities. We do so by means of estimators. 
+
+Estimators, such as the sample mean, are simultaneously abstract and actual. They are random variables AND particular quantities (sample statistics). Consider one estimator, the sample mean. Looked at abstractly, the sample mean is itself a random variable with its own distribution. Looked at concretely, the sample mean is a quantity we can calculate. 
+
+The estimator, therefore, is what does all the work. It is the active element of statistical research; for, the estimator estimates the estimand. Or, what is the same thing, we can use estimators to relate the actual value of the sample mean to the abstract quantity, which is the population mean. 
+
+##One estimator in particular: The mean
+What we are after is the population mean; that is, the abstract quantity. 
+$$
+\mu = E[X]
+$$
+
+What we have is a particular sample statistic, namely the sample mean. However, the sample mean is also an estimator. It is a function of iid random variables. 
+
+Recall:
+$$
+\overline{X} = \frac{1}{n}\sum_{i=1}^nX_i \\
+$$
+Because it is a functional transformation of a random variable(s), the sample mean is a random variable itself. 
+Insofar as the sample mean is considered as an RV, it has an expectation. We can relate the expectation of the sample mean to the expected value of the population. 
+$$
+\begin{aligned}
+E[\overline{X}] & = E[\frac{1}{n}X_1, X_2, ..., X_n] \\
+& = \frac{1}{n}E[X_1, X_2, ..., X_n]  \\
+& = \frac{1}{n}(E[X_1], E[X_2], ..., E[X_n])  \\
+& = \frac{1}{n}(nE[X]) \\
+& = E[X]
+\end{aligned}
+$$
+So, the expectation of the sampling distribution of the sample mean is the expectation of the population. This is what allows us to say that the sample mean is unbiased. But on its own, this is not very useful. After all, the fact that the sample mean is an unbiased estimator only says that it does not deviate from the population mean in any systematic way. It says nothing about how close the sample mean is to the population mean. Indeed, it does not even say THAT the sample mean is close to the population mean. 
+
+And even so, we never have the sampling distribution of the sample mean either. The expectation of the sample mean is abstract. All we can ever calculate is a particular sample mean. We want to say how close the sample mean is to the population mean. But how can we say anything at all about this? 
+
+This is where the magic occurs (although it is not really magic, only mathematics; unless the reader follows the Pythagoreans). For, recall that the sample mean, in addition to being an RV, is also a quantity we can calculate; that is, it is also a sample statistic. 
+
+Two ingredients are required. First is the Weak Law of Large Numbers. It states the following:
+$$
+E[\overline{X_n}] \overset{p}{\to} E[X] \text{ as n increases}
+$$
+Or, what is the same, 
+$$
+E[\frac{1}{n}\sum_{i=1}^nX_i] \overset{p}{\to} E[X] \text{ as n increases}
+$$
+So we can say not only that the sample mean is unbiased, but that it approaches the population mean as the sample gets larger. With larger samples, the expected value of the sample mean gets closer to the population expectation. But again, this alone is not enough. It might get closer, but 'closer' is a relative term. It is little consolation that the sample mean 'gets closer' to the population mean if it remains extraordinarily far away from the quantity we actually want to know about. 
+
+We want to say HOW close it gets. For this, we need the central limit theorem. 
+
+Recall that the CLT states the following: 
+$$
+\overline{X}\overset{d}{\to}N(\mu, \frac{\sigma^2}{n}) \text{ as n increases}
+$$
+This means that, regardless of the underlying distribution from which the sample is drawn, the sampling distribution of the sample mean will approach normality given that the sample is sufficiently large. Further, we know that the expected value of the sampling distribution of the sample mean is the population mean. 
+
+Put differently, because the sampling distribution of the sample mean is normal, and because the expectation of the sampling distribution of the sample mean is the population mean, the central limit theorem tells us that we are more likely to get a sample whose mean is close to the population mean than we are to get a sample whose mean is far away. We can also quantify how much more likely this is, but this is another subject. 
+
