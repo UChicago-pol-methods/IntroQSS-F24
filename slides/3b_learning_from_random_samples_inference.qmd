@@ -128,7 +128,7 @@ We have an estimate $\overline{X}$, and we can estimate $\V[X]$ from the sample.
 
 . . . 
 
-Reporting $\hat{\sigma}[X] = \sqrt{\frac{\hat{\V}[X]}{n}}$, the **standard error**, is a start.
+Reporting $\hat{\sigma}[\overline{X}] = \sqrt{\frac{\hat{\V}[X]}{n}}$, the **standard error**, is a start.
 
 . . . 
 
@@ -136,8 +136,8 @@ Approaches we will take:
 
 - what is an interval centered on $\overline{X}$ that will contain $\E[X]$ in at least 95% of samples? (**confidence interval**)
 - suppose $\E[X] = c$. what is the probability of observing $\overline{X}$ at least as far from $c$ as what we observed? (**p-value**) 
-
-## The researcher's perspective (2)
+ 
+## The researcher's perspective (2) {.smaller}
 
 Generally, these tools of statistical inference require 
 
@@ -289,26 +289,29 @@ norm_tail_plot(inner = 1.96*c(-1, 1)) +
 ::::{.columns}
 
 
-:::{.column column-width="50%"}
+:::{.column column-width="70%"}
 
 ```{r}
 #| echo: true
-# for 95% CI
-qnorm(.025)
-qnorm(.975)
+# -1.96 is the value of a standard normal 
+# i.e. N(0, 1)
+# that is above 2.5% of mass 
+pnorm(q = -1.96, mean = 0, sd = 1)
 
-pnorm(1.96) - pnorm(-1.96)
+# what if not standardized? 
+me <- -.345
+st <- 1.23 
+pnorm(q = me - 1.96*st, mean = me, sd = st)
 
-# for 90% CI
-qnorm(.05)
-qnorm(.95)
-
-pnorm(1.64) - pnorm(-1.64)
+# so 95% is between these
+pnorm(q = 1.96) - pnorm(q = -1.96) # std normal
+pnorm(me + 1.96*st, mean = me, sd = st) - 
+  pnorm(me - 1.96*st, mean = me, sd = st)
 ```
 
 :::
 
-:::{.column column-width="50%"}
+:::{.column column-width="30%"}
 
 ```{r}
 #| fig-height: 3

@@ -31,7 +31,7 @@ The dataset contains a subset of the variables from the 2012 Cooperative Congres
 
 
 
-(1b) Using a for-loop, take 5000 samples of 500 rows from the dataset. In each sample, compute the regression slope coefficient and store it. Report the mean and standard deviation of your 1000 slope coefficients, and plot a histogram of the results. (\textsc{Hint}: before writing your for-loop, make sure you can get a single sample of 500 rows, run a regression in this sample, and extract the coefficient; then embed your code in a for-loop.)
+(1b) Using a for-loop, take 5000 samples of 500 rows from the dataset. In each sample, compute the regression slope coefficient and store it. Report the mean and standard deviation of your 5000 slope coefficients, and plot a histogram of the results. (\textsc{Hint}: before writing your for-loop, make sure you can get a single sample of 500 rows, run a regression in this sample, and extract the coefficient; then embed your code in a for-loop.)
 
 
 (1c) If the sampling distribution you obtained in the previous sub-question were perfectly normal, with mean and standard deviation equal to the mean and standard deviation of your coefficient estimates, what proportion of estimates would be above .4? What proportion of coefficient estimates are actually above .4? 
