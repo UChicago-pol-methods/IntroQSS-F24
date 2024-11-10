@@ -1,0 +1,135 @@
+---
+title: "Problem set 7: Inference"
+author: "(Your name here)"
+subtitle: "Due November 18, 2024, at 10am"
+format: pdf
+---
+
+\def\E{{\textrm E}}
+\def\V{{\textrm V}}
+
+*\textsc{Note}: Start with the file `ps7_2024_inference.qmd` (available from the github repository at <https://github.com/UChicago-pol-methods/IntroQSS-F24/tree/main/assignments>). Modify that file to include your answers. Make sure you can "render" the file (e.g. in RStudio by clicking on the `Render` button). Submit both the qmd file and the PDF via Canvas.* 
+
+
+For questions 1 and 2, you will use the `oregon_subset.csv` dataset (available under `data` on the course github). 
+
+This is a subset of the data from the Oregon Health Insurance Experiment (OHIE). Here is a description of the data from the replication archive [link](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/SJG1ED):
+
+> In 2008, a group of uninsured low-income adults in Oregon was selected by lottery to be given the chance to apply for Medicaid. This lottery provides an opportunity to gauge the effects of expanding access to public health insurance on the health care use, financial strain, and health of low-income adults using a randomized controlled design.
+
+Medicaid is a state-administered health insurance program that is available to adults and children with limited economic resources. At the time of the experiment, Oregonians could enroll in Medicaid through two programs. OHP Plus served "categorically eligible" people, which includes children, pregnant women, and disabled people in low-income families. OHP Standard offered Medicaid to low-income adults not eligible for OHP Plus. Due to budget shortfalls OHP Standard was closed to new enrollment in 2004. In 2008 the state opened OHP Standard to new enrollment, and due to surplus demand it decided to allocate spots in the program using a lottery (i.e. random assignment).   
+
+The variables you will use are: 
+
+- `lottery_winner`: 1 if participant received the opportunity to enroll in Medicaid, otherwise 0
+- `enrolled`: 1 if participant enrolled in Medicaid at some point between joining the study and the follow-up survey collecting post-treatment outcomes
+- `borrow`: response on the follow-up survey to "In the last 12 months, have you had to borrow money, skip paying other bills, or pay other bills late in order to pay health care bills?" -- 1 if yes, 0 if no
+
+\vspace{.5in}
+
+**Question 1: Inference for a difference in sample means**
+
+For this question, your estimand is the effect of winning the OHIE lottery (and thus being eligible to enroll in Medicaid) on the probability of needing to borrow money to pay medical bills. 
+
+Your (plug-in) estimator of this effect is $\overline{Y}_1 - \overline{Y}_0$, where $\overline{Y}_1$ is the proportion of lottery winners who needed to borrow (i.e. the sample mean of `borrow` among those with `lottery_winner == 1`) and $\overline{Y}_0$ is the proportion of lottery losers who needed to borrow (i.e. the sample mean of `borrow` among those with `lottery_winner == 0`). 
+
+(1a) Report the value of this estimator in the dataset. Interpret this number, i.e. explain in a sentence what it means about the relationship between Medicaid eligibility and borrowing. 
+```{r}
+# your code here
+```
+
+
+\vspace{.25in}
+
+(1b) Suppose that the data we have is an iid sample from a larger population of Oregonians who participated in the lottery. The following is a derivation of the sampling variance of your estimator. Explain each step.
+
+Letting $n_1$ be the number of lottery winners and $n_0$ be the number of lottery losers,  
+\begin{align}
+\V[\overline{Y}_1 - \overline{Y}_0] &= \V[\overline{Y}_1] + \V[\overline{Y}_0] - 2\text{Cov}[\overline{Y}_1, \overline{Y}_0]  \tag{Step 1}\\ 
+&=  \V[\overline{Y}_1] + \V[\overline{Y}_0]  \tag{Step 2} \\
+&=  \frac{\V[Y_1]}{n_1} + \frac{\V[Y_0]}{n_0} \tag{Step 3}
+\end{align}
+
+\vspace{.25in}
+
+(1c) Using the result from (1b) and a normal approximation, report the 95% confidence interval for your estimate.
+
+\vspace{.25in}
+
+(1d) Using the result from (1b) and a normal approximation, report a two-sided $p$-value, where the null hypothesis is that the effect of eligibility is zero. 
+
+
+\vspace{.75in}
+
+
+**Question 2: Bootstrap inference for the Wald estimator**
+
+For this question, we focus on a different estimand. Define *compliers* as subjects who enroll in Medicaid if and only if they gain eligibility through the lottery. Your estimand is the effect of enrolling in Medicaid on needing to borrow money to pay medical bills, specifically for compliers. This is known as the Local Average Treatment Effect or the Complier Average Treatment Effect; you will learn about it in a Causal Inference course.
+
+The estimand can be written as 
+$$\tau_{\text{LATE}} = \E\left[Y_1 - Y_0 \mid D_1 - D_0 = 1\right]$$
+where 
+
+- $Y_1$ is the value of `borrow` if one wins eligibility in the lottery,
+- $Y_0$ is the value of `borrow` if one does not win eligibility in the lottery,
+- $D_1$ is the value of `enrolled` if one wins eligibility in the lottery,
+- $D_0$ is the value of `enrolled` if one does not win eligibility in the lottery.
+
+The Wald estimator is 
+$$\hat{\tau}_{\text{Wald}} = \frac{\overline{Y}_1 - \overline{Y}_0 }{\overline{D}_1 - \overline{D}_0},$$
+where
+
+- $\overline{Y}_1$ is the average value of `borrow` among lottery winners in the sample, 
+- $\overline{Y}_0$ is the average value of `borrow` among lottery non-winners in the sample, 
+- $\overline{D}_1$ is the average value of `enrolled` among lottery winners in the sample, 
+- $\overline{D}_1$ is the average value of `enrolled` among lottery non-winners in the sample.
+
+Under assumptions that you will learn about in Causal Inference, $\E[\hat{\tau}_{\text{Wald}}] = \tau_{\text{LATE}}$.
+
+It is possible to derive an estimator for the sampling variance of the Wald estimator, but it's not easy. We'll use the bootstrap instead.
+
+\vspace{.5in}
+
+(2a) Report the value of the Wald estimator in the dataset. Interpret this number, i.e. explain in a sentence what it means about the relationship between Medicaid enrollment and borrowing.
+
+\vspace{.5in}
+
+(2b) Use the bootstrap ("naive bootstrap") to estimate the standard error of the Wald estimator and use that standard error (and a normal approximation) to report the 95% confidence interval for $\tau_{\text{LATE}}$.
+
+\vspace{.5in}
+
+
+(2c) Using your standard error from (2b) and a normal approximation, report a two-sided $p$-value, where the null hypothesis is that the average effect of medicaid enrollment on compliers is zero. 
+
+\vspace{.75in} 
+
+**Question 3: Randomization inference**
+
+Taylor Swift, the musician, is reportedly dating an American football player named Travis Kelce. Swift attends some of Kelce's games. Last season, a broadcaster observed that Kelce produced better results when Swift was in attendance, referring to a "Taylor Swift effect".
+
+The dataset `kelce.csv` (available on the course github under `data`) contains the following variables about the first seven games of last season: 
+
+- `yards`: receiving yards by Kelce, a measure of his performance (higher is better)
+- `swift`: 1 if Swift attended the game, 0 otherwise
+- `home`: 1 if it was a home game, 0 otherwise
+
+
+(3a) Report and store the difference in Kelce's average receiving yards when Swift attended vs did not attend. 
+
+\vspace{.5in} 
+
+(3b) Using randomization inference, simulate the randomization distribution of the "Taylor Swift effect" under the sharp null hypothesis that Kelce's yardage in each game did not depend at all on Swift's attendance, i.e. that Kelce's yardage in each game that Swift **did not** attend would have been the same if she **had attended**, and Kelce's yardage in each game that Swift **did attend** would have been the same if she **had not attended**. That is, you should generate the distribution of the estimated effect of Swift's attendance (under the sharp null) across possible combinations of four games that Swift could have chosen to attend. Plot the histogram of this randomization distribution and include a vertical line for the observed value.
+
+\vspace{.5in}
+
+
+(3c) Again using randomization inference (not a normal approximation), compute the upper one-tailed $p$-value of the observed "Taylor Swift effect", i.e. the proportion of randomizations producing a yardage difference bigger than the one we observed.
+
+\vspace{.5in}
+
+(3e) **Bonus**: Is this convincing evidence that Taylor Swift's presence affects Kelce's performance? Discuss.
+
+
+
+
+
