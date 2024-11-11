@@ -107,7 +107,7 @@ It is possible to derive an estimator for the sampling variance of the Wald esti
 
 Taylor Swift, the musician, is reportedly dating an American football player named Travis Kelce. Swift attends some of Kelce's games. Last season, a broadcaster observed that Kelce produced better results when Swift was in attendance, referring to a "Taylor Swift effect".
 
-The dataset `kelce.csv` (available on the course github under `data`) contains the following variables about the first seven games of last season: 
+The dataset `kelce.csv` (available on the course github under `data`, provided by Michael Tesler) contains the following variables about the first seven games of last season: 
 
 - `yards`: receiving yards by Kelce, a measure of his performance (higher is better)
 - `swift`: 1 if Swift attended the game, 0 otherwise
