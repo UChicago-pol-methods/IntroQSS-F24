@@ -607,12 +607,17 @@ norm_tail_plot() +
 
 ## $p$-value logic (2)
 
-::::{.columns}
-:::{.column column-width="60%"}
-
 But we can say, "Suppose $\theta = \theta_0$".
 
-In that case, we know that*
+$\theta_0$ is called the *null hypothesis*. "Under the null" means "assuming $\theta = \theta_0$".
+
+. . . 
+
+::::{.columns}
+:::{.column column-width="70%"}
+
+
+Under the null, we have
 
 $$\hat{\theta} \sim N(\theta_0, \hat{\sigma}^2)$$
 and we can estimate the probability that $\hat{\theta}$ would be in any interval, given $\theta_0$. 
@@ -620,7 +625,7 @@ and we can estimate the probability that $\hat{\theta}$ would be in any interval
 
 :::
 
-:::{.column column-width="40%"}
+:::{.column column-width="30%"}
 
 ```{r}
 #| fig-height: 2.75
@@ -635,7 +640,7 @@ norm_tail_plot(inner = c(-.5, 1.1)) +
 :::
 ::::
 
-*Asymptotically, and if $\text{V}[\hat{\theta} \mid \theta = \theta_0] = \text{V}[\hat{\theta}]$ 
+<!-- *Asymptotically, and if $\text{V}[\hat{\theta}]$ under the null equals $\E\left[\hat{\V}[\theta]\right]$  --> 
 
 
 
@@ -646,8 +651,8 @@ norm_tail_plot(inner = c(-.5, 1.1)) +
 
 Lower one-tailed p-value: 
 
-$$\text{Pr}[\hat{\theta} \leq \hat{\theta}^*] \, \, \text{assuming} \,\, \theta = \theta_0$$
-i.e. "under the null".
+$$\text{Pr}[\hat{\theta} \leq \hat{\theta}^*] $$
+under the null.
 
 :::
 
@@ -677,8 +682,8 @@ norm_tail_plot(lower = c(-1.2)) +
 
 Upper one-tailed p-value: 
 
-$$\text{Pr}[\hat{\theta} \geq \hat{\theta}^*] \, \, \text{assuming} \,\, \theta = \theta_0$$
-i.e. "under the null".
+$$\text{Pr}[\hat{\theta} \geq \hat{\theta}^*] $$
+under the null.
 
 
 :::
@@ -706,7 +711,7 @@ norm_tail_plot(upper = c(1.2)) +
 ## The two-tailed $p$-value
 
 Two-tailed p-value: 
-$\text{Pr}\left[\lvert\hat{\theta} - \theta_0\rvert \geq \lvert\hat{\theta}^* - \theta_0\rvert \right]$ assuming $\theta = \theta_0$, i.e. "under the null".
+$\text{Pr}\left[\lvert\hat{\theta} - \theta_0\rvert \geq \lvert\hat{\theta}^* - \theta_0\rvert \right]$ under the null.
 
 
 <!-- $\text{Pr}\left[\lvert\hat{\theta} - \theta_0\rvert \geq \lvert\hat{\theta}^* - \theta_0\rvert \bigm| \theta = \theta_0\right]$--> 
@@ -740,7 +745,11 @@ $|t|$ gets bigger when
 
 . . . 
 
-If the null is true ($\theta = \theta_0$), then asymptotically $t \sim N(0, 1)$.
+Under the null, asymptotically $t \sim N(0, 1)$.
+
+. . . 
+
+Like $z$-score ($\frac{X - \overline{X}}{\sigma[X]}$), $t$-statistic is a standardization/normalization. 
 
 ## Computing $p$-values (2)
 
@@ -859,22 +868,18 @@ norm_tail_plot(lower = -this_t, upper = this_t) +
 
 
 
-## One-tailed vs two-tailed {.smaller}
+## One-tailed vs two-tailed 
 
 - **Lower one-tailed $p$-value** answers question, "How likely is it that I would get a value at least as *low* as $\hat{\theta}^*$ ($t^*$) if $\theta = \theta_0$?" [(similar for upper)]{.gray}
 - **Two-tailed $p$-value** answers question, "How likely is it that I would get a value at least as *extreme* as $\hat{\theta}^*$ ($t^*$) if $\theta = \theta_0$?"
 
 . . . 
 
-<br> 
-
-In principle, both interesting. One-tailed especially relevant if the null hypothesis is really that $\theta \geq \theta_0$.
+In principle, both interesting. One-tailed especially relevant if the null hypothesis is really that $\theta \geq \theta_0$ or $\theta \leq \theta_0$
 
 . . . 
 
-<br> 
-
-In practice, we only use one-tailed tests when the test is *pre-registered*. Otherwise two-tailed to be conservative, given the way $p$-values are used in testing.
+In practice, we only use one-tailed tests when the test is *pre-registered*. Otherwise two-tailed to be conservative. Why? <!-- given the way $p$-values are used in testing. --> 
 
 
 ## Null hypothesis significance testing (NHST)  {.smaller}
