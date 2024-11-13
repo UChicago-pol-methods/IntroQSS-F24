@@ -1033,7 +1033,7 @@ But what about the variance $\V[\hat{\theta}]$? [(necessary for CIs, $p$-values)
 
 We proved that $\V[\overline{X}] = \frac{\V[X]}{n}$ given iid samples, but what about 
 
-- other estimators?
+- other estimands/estimators?
 - non iid samples?
 
 **Example:** correlation between two variables, ratio of two means 
@@ -1047,9 +1047,9 @@ The **bootstrap** is a very general solution for estimating $\V[\hat{\theta}]$.
 
 ## Bootstrap basics
 
-$\V[\hat{\theta}]$ describes the variance of $\hat{\theta}$ across samples of size $n$.
+$\V[\hat{\theta}]$ describes the variance of $\hat{\theta}$ across samples [of size $n$]{.gray}.
 
-**Problem:** We have only one sample of size $n$.
+**Problem:** We have only one sample [of size $n$]{.gray}.
 
 . . . 
 
@@ -1073,11 +1073,36 @@ mean(resamp2)
 mean(resamp3)
 ```
 
-## Why does this work? {.smaller}
+## Bootstrap illustration (2)
+
+```{r}
+#| echo: true
+m <- 1000
+sto <- rep(NA, times = m)
+for(i in 1:m){
+  resamp <- sample(samp, size = length(samp), replace = T)
+  sto[i] <- mean(resamp)
+}
+```
+
+. . . 
+
+```{r}
+#| echo: true
+# these are our simulated sample means 
+head(sto) 
+# our bootstrap estimate of the variance of the sample mean:
+var(sto) 
+# our bootstrap estimate of the standard error (of the sample mean):
+sd(sto) 
+```
+
+
+## Does this work? (And if so why?) {.smaller}
 
 The bootstrap is a **plug-in estimator**!
 
-- The estimand is now $\V[\hat{\theta}]$, the sampling variance
+- Our estimand is $\V[\hat{\theta}]$, the sampling variance
 - If we had the population, we could compute $\V[\hat{\theta}]$ by resampling from population
 - We don't have the population, so we "plug in" the sample and resample from that
 - As $n$ increases, the sample looks more like the population, so the bootstrap estimate of $\V[\hat{\theta}]$ gets closer to the estimand
@@ -1337,19 +1362,128 @@ Under sharp null, we **do** know the missing potential outcomes: they are the sa
 
 So:
 
-- randomly reshuffle the treatment
-- compute treatment effect under sharp null
+- randomly reshuffle the treatment [-- e.g. instead of `1, 1, 0, 1, 0, 0` (actual treatments ), use `1, 0, 0, 1, 1, 0`]{.gray}
+- compute "treatment effect" under sharp null
 - store and repeat
 
 . . . 
 
 Get a $p$-value by comparing observed treatment effect to distribution of treatment effects under sharp null.
 
-<!-- consider example with taylor swift -->     <!-- okay now maybe write problem set for next week, while it's fresh in my head? --> 
+
+## Randomization inference example {.smaller}
+
+```{r}
+#| echo: false
+#| message: false
+#| output: false
+library(dplyr)
+load("./../data/ggl.RData")
+ggl |> 
+  filter(treatment %in% c("Control", "CivicDuty")) |> 
+  group_by(treatment, hh_id, hh_size) |> 
+  summarize(voted = mean(voted)) |> 
+  ungroup() -> d2
+```
+
+Green, Gerber, and Larimer assign households to receive GOTV fliers or not.
+
+```{r}
+#| echo: false
+d2 |> 
+  slice_sample(n = nrow(d2)) |> 
+  select(-hh_id) -> tmp
+
+bind_rows(
+  tmp |>
+  filter(treatment == "Control") |> 
+  slice(1:3),
+  tmp |>
+  filter(treatment == "CivicDuty") |> 
+  slice(1:3)
+)
+```
+
+. . . 
+
+Turnout rate by type of household:
+
+```{r}
+#| echo: true
+(treat_mean <- mean(d2$voted[d2$treatment == "CivicDuty"]))
+(control_mean <- mean(d2$voted[d2$treatment == "Control"]))
+```
+
+```{r}
+#| echo: true
+(true_diff <- treat_mean - control_mean)
+```
 
 
-<!-- put p-value in? or that's for the problem set? --> 
+## Randomization inference example (2) {.smaller}
+
+
+What is the probability of getting a turnout difference as big as `r round(true_diff, 3)` if the treatment has no effect on any household? 
+
+. . . 
+
+```{r}
+#| echo: true
+m <- 1000; sto <- 1:m; d3 <- d2
+for(i in 1:m){
+  d3$voted <- sample(d3$voted)
+  sto[i] <- mean(d3$voted[d3$treatment == "CivicDuty"]) - 
+mean(d3$voted[d3$treatment == "Control"])
+}
+```
+
+. . . 
+
+::::{.columns}
+
+
+:::{.column column-width="70%"}
+
+
+```{r}
+hist(sto, xlim = c(-true_diff, true_diff))
+abline(v = true_diff)
+```
+
+::: 
+
+:::{.column column-width="30%"}
+
+<br>
+<br>
 
 <!-- percentile method for bootstrap approach --> 
+```{r}
+#| echo: true
+mean(abs(sto) > true_diff)
+```
+
+:::
+::::
+
+## Inference wrap-up
+
+If we are going to report measures of uncertainty, we need to specify what is uncertain.
+
+. . . 
+
+Our focus was on *sampling* from a population -- the most straightforward. 
+
+. . . 
+
+In randomization inference, we focused on *treatment assignment* as another source of uncertainty.
+
+. . . 
+
+In most social science research, source of uncertainty not specified, but could be 
+
+- sampling from a *super-population*: there could have been other OECDs out there!
+- model-based uncertainty -- treat the error term as random, e.g. due to measurement error or other unknown factors
+
 
 
