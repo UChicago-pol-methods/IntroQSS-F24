@@ -1,0 +1,250 @@
+---
+title: "Lab 7: Bootstraping, p-values, hypothesis testing"
+author: "John Kainer"
+format: pdf
+---
+
+## Part 1: The Naive Bootstrap
+What is a bootstrap? Bootstrapping is a statistical procedure used to estimate the distribution of an estimator by means of resampling with replacement. Proceeding from the assumption that the sample is similar to the population, we can generate artificial samples by sampling from our sample. 
+
+Then, we can estimate the variance of our estimator across samples by using the variance of our estimateor across artificial (bootstrap) samples. 
+
+Why do we want to do this? 
+
+We know that the sample is an approximation of the population. We know that plug in estimators are normally distributed. However, we do not know what the variance or standard error of all these estimators is (we know some of them, for instance, $V[\overline{X}] = \frac{V[X]}{n}$, but not all of them). What we want is to estimate the variance or standard error of these estimators. For many estimators, proving analytically what the variance is is a highly cumbersome process. The bootstrap allows you to estimate the variance of an estimator without having to do too much math. 
+
+Bootstrap samples use an existing sample. As usual, we will be using the Iris dataset. 
+```{r}
+data(iris)
+```
+
+The algorithm for the naive bootstrap is as follows:
+
+  1. Begin with an original sample. This will typically be a dataset, which will be an actual sample from the         population. If your dataset includes the whole population, you can treat it as a hypothetical sample from a larger   superpopulation. 
+
+  2. Sample from the dataset WITH replacement. 
+
+  3. Calculate the test statistic you are interested in from each bootstrap sample.
+
+  4. Repeat many times. 
+
+  5. Use the many bootstrap values to estimate the distribution of the test statistic in which you are interested. 
+
+# Simple Bootstrap Example: Sepal Length
+```{r}
+bootstrap_means <- rep(NA, 1000)
+
+for(i in 1:length(bootstrap_means)){
+  bootstrap_resample <- sample(x = iris$Sepal.Length, size = length(iris$Sepal.Length), replace = TRUE)
+  bootstrap_means[i] <- mean(bootstrap_resample)
+  
+}
+hist(bootstrap_means)
+abline(v = mean(iris$Sepal.Length), col = 'red')
+bootstrap_means
+st_error <- sqrt(var(bootstrap_means)/length(iris$Sepal.Length))
+mean(iris$Sepal.Length)
+```
+
+## Part 2: Hypothesis Testing
+We have learned how to use the bootstrap to estimate the distribution of an estimator in an agnostic fashion. In this section, we will learn about hypothesis tests, as well as how to use the bootstrap in the context of hypothesis testing. 
+
+Let us test the null hypothesis that says that the mean value of Sepal Length is 5.5 units. How could we elaborate this hypothesis: 
+$$
+H_0: \theta = 5.5 \\
+H_a: \theta \neq 5.5
+$$
+How could we test this hypothesis?
+  1. Specify a null and alternative hypothesis
+
+  2. Choose a significance level $\alpha$, which can be interpreted as the probability of wrongly rejecting a null    hypothesis. By convention, social scientists almost always choose $\alpha = 0.05$. 
+
+  3. Specify the appropriate test statistic. We use
+  
+$$
+t = \frac{\hat{\theta} - \theta_0}{s/\sqrt{n}}
+$$
+
+  4. Calculate the p-value. 
+The p-value is calculated by means of the test statistic. 
+
+  5. Reject or retain the null hypothesis. 
+Why do we say retain? This decision comes from a basically Popperian view of science according to which the criterion for a hypothesis being scientific is that it is, in principle, falsifiable. According to this view, we shouldn't say that a given hypothesis is true. Rather, we should say that it has not yet been falsified, and should therefore be retained. 
+
+How could we test this hypothesis this without the bootstrap?
+```{r}
+mu <- mean(iris$Sepal.Length)
+mu
+H_0_value <- 5.5
+
+sd_iris <- sd(iris$Sepal.Length)
+n <- length(iris$Sepal.Length)
+st_error <- sd_iris/sqrt(n)
+
+t_stat <- (mu-H_0_value)/st_error
+t_stat
+p_value <- 2*(1 - pnorm(t_stat))
+p_value
+```
+
+# Interpretation of p-Values: 
+How do we interpret this p-value?
+
+We got a p-value of 0.0000003813376. The p-value is the probability that we would have obtained the result we did if the null hypothesis were true. Recall that from this sample, we calculated that the mean of Sepal Length is about 5.84. Our null hypothesis was that the Sepal Length is was 5.5. 
+
+Thus, we interpret our p-value as follows: "if indeed the mean sepal length was 5.5., the probability that we would have obtained an estimate at least as extreme as 5.84 or more extreme is 0.000000381, or about 4 in a billion. This is unlikely, so we feel comfortable rejecting the null hypothesis. 
+
+'Extreme' in the case of a two-tailed test means deviant from the value we have specified in our null hypothesis. So, since we specified a null of 5.5., what we mean by 'at least as extreme as 5.84 or more extreme' is $5.84-5.5=0.34$ away from our specified null value either in the positive or the negative direction. 
+
+## Part 3: Putting it all together: Hypothesis Testing with the Bootstrap
+We can test the hypothesis in the above fashion because we know the variance of the sample mean already. Specifically, we know that $V[\overline{X}] = \frac{V[X]}{n}$. Further, by the law of large numbers, we know that the variance of the sampling distribution of the sample mean approaches the variance of the population. Finally, we know by the CLT that the sampling distribution of the sample mean is normal. 
+
+However, what if we can't assume that our estimator is normally distributed? What if we cannot make any assumptions about the underlying variance of the sampling distribution? Then, we can use the bootstrap. 
+
+How would we test this hypothesis with the bootstrap?
+```{r}
+H_0_value <- 5.5
+bootstrap_means <- rep(NA, 10000)
+
+for(i in 1:length(bootstrap_means)){
+  bootstrap_resample <- sample(x = iris$Sepal.Length, size = length(iris$Sepal.Length), replace = TRUE)
+  bootstrap_means[i] <- mean(bootstrap_resample)
+  
+}
+hist(bootstrap_means)
+abline(v = mean(iris$Sepal.Length), col = 'red')
+
+mu <- mean(bootstrap_means)
+H_0_value <- 5.5
+
+sd_bootstrap <- sd(bootstrap_means)
+n <- length(iris$Sepal.Length)
+st_error_bootstrap <- sd_bootstrap/sqrt(n)
+
+
+t_stat <- abs(mu-H_0_value)/st_error
+p_value <- 2*(1 - pnorm(t_stat))
+p_value
+```
+
+What does the bootstrap require us to assume in this case?
+
+#Example 2: Hypothesis Testing with the Bootstrap for Regression Coefficients
+$$
+H_0 : \beta = 0 \\
+H_a : \beta \neq 0
+$$
+How should we interpret these hypotheses?
+
+How could we perform this test without the bootstrap?
+```{r}
+model_1 <- summary(lm(Petal.Length~Petal.Width, data = iris))
+model_1
+```
+Again, how could we interpret the p-value on the "Petal.Width" coefficient?
+
+#Brief Aside on Brackets: Extracting from Regression Tables
+```{r}
+model_1 <- summary(lm(Petal.Length~Petal.Width, data = iris))
+model_1$coefficients
+
+beta <- model_1$coefficients["Petal.Width", "Estimate"]
+std_error <- model_1$coefficients["Petal.Width", "Std. Error"]
+
+t_stat <- beta/std_error
+p_value <- 2*(1 - pnorm(t_stat))
+
+p_value
+p_value_alt <- model_1$coefficients["Petal.Width", "Pr(>|t|)"]
+p_value_alt
+```
+Why is one displayed as 4.675004e-86 and the other displayed as 0? 
+
+How could we test this hypothesis using the naive bootstrap?
+```{r}
+H_0_value <- 0
+bootstrap_coefficients <- rep(NA, 10000)
+
+for(i in 1:length(bootstrap_coefficients)){
+  bootstrap_samples <- iris[sample(1:nrow(iris), replace = TRUE), ]
+  bootstrap_models <- summary(lm(Petal.Length~Petal.Width, data = iris))
+  bootstrap_coefficients[i] <- bootstrap_models$coefficients["Petal.Width", "Estimate"]
+  
+}
+
+bootstrap_beta <- mean(bootstrap_coefficients)
+
+sd_bootstrap <- sd(bootstrap_coefficients)
+n <- length(nrow(iris))
+st_error_bootstrap <- sd_bootstrap/sqrt(n)
+
+t_stat <- (bootstrap_beta - 0)/st_error_bootstrap
+p_value <- 2*(1 - pnorm(t_stat))
+p_value
+```
+
+#Part 4: Randomization inference
+In our discussion of bootstrapping, we were interested in estimating the sampling distribution of estimators. That is, the 'randomness' occurred at the level of the sample. We were interested in seeing the variability of our estimator across samples. To estimate this variability, we took 'artificial samples' from an existing sample, treating the latter as if it were the whole population. We can think of this as creating new datasets, calculating the estimate (by means of the estimator) for each, and plotting the distribution of the estimates. 
+
+In randomization inference, randomness occurs not at the level of the sample, but rather at the level of the 'treatment', or, of one variable in which we are interested. It will be best to proceed by way of an example. We will use the Prestige dataset in the car package. 
+```{r}
+library(car)
+data(Prestige)
+```
+
+Let us say we are interested in the effect (note the causal language) of a job type on the prestige of an occupation. The variable 'type' is categorical and consists of: 'prof' (professional), 'wc' (white collar), and 'bc.' Suppose we are interested only in assessing whether being a professional type job (e.g., being a doctor, lawyer, professor) effects prestige. 
+
+Now, what we have is observational data. We know the prestige of an individual who has certain characteristics, among which is, for instance, having a 'professional' job. However, we want to know what the prestige of this same person would have been if she did not have a professional job. Yet we cannot observe this counterfactual. This is the fundamental problem of causal inference. Randomization inference is one way of getting around it. How does it work. 
+
+We will do the following procedure. 
+1. Specify the sharp null.
+
+2. Calculate the mean difference in prestige from the observational data. 
+
+3. Randomize mechanically the treatment (namely, having a professional job)
+
+4. Calculate the mean difference in prestige from the datasets where the treatment was randomized. 
+
+5. Compare these differences to calculate a p-value
+
+
+Sharp Null: Professionals are no more prestigious than white collar or blue collar workers 
+Formally
+$$
+H_0: \mu_{prof} - \mu_{\neg{prof}} = 0 \\
+H_a: \mu_{prof} - \mu_{\neg{prof}} \neq 0
+$$
+Observed Difference:
+```{r}
+diff <- mean(Prestige$prestige[Prestige$type == "prof"], na.rm =T) - 
+  mean(Prestige$prestige[Prestige$type != "prof"], na.rm = T) 
+diff
+```
+
+
+Randomization of 'treatment': 
+```{r}
+m <- 1000
+  
+rando_diffs <- rep(NA, m)
+  
+for(i in 1:m){
+  Prestige$fake_type <- sample(Prestige$type, size = nrow(Prestige), replace = T)
+  rando_diffs[i] <- mean(Prestige$prestige[Prestige$fake_type == "prof"], na.rm = T) - 
+    mean(Prestige$prestige[Prestige$fake_type != "prof"], na.rm = T)
+}
+
+```
+What is going on in this code? How does it differ from bootstrapping. Visually, you can think of bootstrapping as generating new datasets from an existing dataset. Randomization inference is different. What occurs in this instance is that we create a new column, 'fake_type', whose values are the randomly shuffled values of the variable 'type.' All the other columns, however, remain the same. 
+
+We can also observe the difference visually by plotting it. 
+```{r}
+hist(rando_diffs, xlab = "Difference in Prestige, Professional vs Not", xlim = range(c(rando_diffs, diff)))
+abline(v = diff, col = "red", lwd = 2) 
+```
+
+We calculate a p-value by comparing the random differences with the observed difference. Note that this is a two tailed test. Your homework asks you to calculate a one tailed test. 
+```{r}
+mean(abs(rando_diffs) >= abs(diff))
+```
+What does this p-value mean? It means that if the sharp null were true, the probability that we would have observed a difference at least as extreme (or more extreme) than the one we in fact observed (30.01555) is approximately 0. More concretely, if being a professional had no effect on a job's prestige, then the probability that we would have observed a difference between professional and non-professional types as large (or larger) than we did is very low, so we can reject the sharp null. 
