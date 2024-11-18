@@ -1485,5 +1485,7 @@ In most social science research, source of uncertainty not specified, but could 
 - sampling from a *super-population*: there could have been other OECDs out there!
 - model-based uncertainty -- treat the error term as random, e.g. due to measurement error or other unknown factors
 
+<!-- TODO: bootstrap picture: sampling from the sample instead of the population --> 
+
 
 
