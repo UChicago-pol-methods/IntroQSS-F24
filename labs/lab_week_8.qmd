@@ -1,0 +1,222 @@
+---
+title: "Lab Week 8: Regression"
+author: "John Kainer"
+format: pdf
+---
+##3 Quick Clarifications
+1. Homework question 3c:
+The question was phrased in terms of strict inequality, but p-values assume weak inequality. 
+
+Normally, this won't matter; for, in a continuous or nearly continuous distribution, there is no difference between computing the probability that P(x >= y) is almost exactly P(x > y).
+
+In this problem, where the distribution is not continuous and there are few observations, there is a difference. Hence, mean(random_difference >= observed_difference) is quite different from mean(random_difference > observed_difference).
+
+The wording of the question suggests that mean(random_difference > observed_difference) is right. However, the definition of a p-value suggests that mean(random_difference >= observed_difference) is right. 
+
+2. Bootstrap Standard Errors
+```{r}
+data(Iris)
+mu <- mean(iris$Sepal.Length)
+mu
+H_0_value <- 5.5
+
+sd_iris <- sd(iris$Sepal.Length)
+n <- length(iris$Sepal.Length)
+st_error <- sd_iris/sqrt(n)
+
+```
+
+Here when we calculate the standard error, we divide by sqrt(n). We can do this in this case because we know analytically that $V[\overline{X}] = \frac{V[X]}{n}$. With bootstrapping however, we do not have a 'formula' to calculate the standard error of our estimator, hence:
+```{r}
+bootstrap_means <- rep(NA, 10000)
+
+for(i in 1:length(bootstrap_means)){
+  bootstrap_resample <- sample(x = iris$Sepal.Length, size = length(iris$Sepal.Length), replace = TRUE)
+  bootstrap_means[i] <- mean(bootstrap_resample)
+  
+}
+hist(bootstrap_means)
+abline(v = mean(iris$Sepal.Length), col = 'red')
+
+mu <- mean(bootstrap_means)
+H_0_value <- 5.5
+
+sd_bootstrap <- sd(bootstrap_means)
+```
+Because we do not have a formula for the standard error, we simply take the standard deviation of the bootstrap means. This is the case for any estimator, not just the mean. We do not divide by n. We do so on the former case because we know the formula for the variance. Since we do not know it in the case of bootstrapping (or since we don't make assumptions about it), we simply take the standard deviation. The bootstrap is agnostic. 
+
+3. P-values in r
+P values are calculated using test statistics. For example, with regard to the mean: 
+$$
+t = \frac{\hat{\theta} - \theta_0}{s/\sqrt{n}}
+$$
+The test statistic is a number that we convert to the p-value on the basis of a hypothesis we have specified. For a two-sided hypothesis about the value of the sample mean, we know that the sample mean is normally distributed. Because of this, we use the following code to calculate the p-value:
+
+```{r}
+p_value <- 2*(1 - pnorm(t_stat))
+```
+what is this code doing?
+
+1. pnorm(t_stat) tells us the probability that the random variable (which has a standard normal distribution) in which we are interested is less than or equal to the value of the test statistic. In other words, it gives the area under the normal curve to the left of t_stat.
+
+2. 1 - pnorm(t_stat) subtracts the result of pnorm(t_stat) from 1, which gives the area to the right of t_stat on the normal distribution curve. This is the probability of observing a value greater than the test statistic under the null hypothesis.
+
+3. 2*(1 - pnorm(t_stat)): since the hypothesis test is two-sided, we are interested in the probability of obtaining a test statistic at least as extreme as the observed test statistic, in both directions. Hence, we do not just want the probability of observing a value greater than, but also less than, the test statistic. Because the standard normal is symmetric, we can multiply the previous probability by 2 to obtain the p value. 
+
+In computing p-values manually (which you are unlikely to do very often outside this class), it is important to consider the hypothesis you are testing, and how this relates to the way you specify your code on the basis of the test statistic you have. In the last lab, I took abs(t_stat) to ensure that this code would always work for a two-tailed hypothesis. But, the code you would use to calculate a one-tailed p-value is different.
+
+## Regression Model Review
+Recall that the univariate linear regression model is expressed as follows. 
+$$
+y = \alpha + \beta X \\
+\text{ }\\
+\text{sometimes, we express it a little differently, as:} \\
+\text{ }\\
+y = \beta_0 +\beta_1X_1
+$$ 
+Roughly speaking, it is interpreted as follows: 
+$y$ represents what we are trying to predict 
+$\beta_0$ represents the intercept 
+$X_1$ represents the variable we are using to predict y 
+$\beta_1$ represents the coefficient variable we are using to predict y 
+$\epsilon$ is an error term; or, the variation in y not captured by X
+
+#Regression in 'R' 
+```{r}
+library(car)
+data(Prestige)
+
+data_location<-"https://github.com/UChicago-pol-methods/IntroQSS-F24/raw/main/data/cces_2012_subset.csv"
+cces <- read.csv(url(data_location))
+
+#aa is affirmative action
+#env is environment
+```
+
+We have already run several regressions in 'R', both in the labs and on the homework assignments. And indeed, the code itself is not complicated. However, having learned a great deal more since our first time running a regression together, we are now in a position to interpret the output in greater detail. Recall a regression we have run previously:
+
+```{r}
+# your code here
+summary(lm(prestige~women, Prestige))
+```
+
+Fill out the equation below to get the functional form of this model:
+
+$$
+y() = \beta_0() + \beta_1()\\
+$$
+
+#### Interpretation Questions:
+
+How do we interpret the coefficients substantively? 
+
+How do we interpret the p-value on the 'women coefficient?
+
+## Controls and Multivariate Regression
+Above, the coefficient on women is negative, indicating that as the percentage of women in a profession increases, the prestige of that profession decreases. As we have seen, this coefficient is statistically insignificant. But even if it were significant, we might be still be suspicious of this result. 
+
+It is quite possible, for instance, that the apparent inverse relation of women and prestige is driven by a confounding variable. For example. Many industries in which women predominate (teaching, nursing, childcare, etc) are also industries that pay less. Therefore, we might suppose that income, which is positively associated with women and negatively associated with prestige, is driving the apparent negative association between women and prestige. In this case, the correlation between women and prestige previously observed would be spurious. 
+
+Assume, therefore, that we wish to observe how the percentage of women in an industry is associated with the prestige of that industry *holding income constant.* That is, 'controlling for' income. We can do this with multivariate regression. That is, we can regress prestige on multiple variables and observe the association of each with prestige individually. 
+```{r}
+#your code here
+summary(lm(prestige~income + women, Prestige))
+```
+####Interpretation
+How would we interpret each coefficient substantively?
+
+How have the p-values changed from the previous regression?
+
+#Multivariate Regression Model
+Without using linear algebra notion, the multivariate regression model can be expressed as follows
+$$
+y = \beta_0+\beta_1X_1+ \beta_2X_2 + ...+\beta_nX_n 
+$$
+Now, lets predict prestige with all the relevant variables. 
+```{r}
+summary(lm(prestige~education+income+women+type, data = Prestige))
+```
+
+Can we interpret any of these coefficients causally? Why or why not?
+
+### Interaction Terms
+You may also be interested in the **interaction** of 2 variables. Interpretation of interaction terms is tricky. 
+
+This means that the association of one independent variable on the dependent variable depends on the level of another independent variable. Formally, this can be expressed as follows: 
+$$
+y = \beta_0 +\beta_1X_1 + \beta_2X_2 + \beta_3(X_1*X_2)
+$$
+It might be easier to go over a substantive example. Consider an interaction between women and income on prestige. How could we interpret what an interaction between substantively means in this case. I will formulate this in multiple ways. 
+
+1. The extent to which income is associated with prestige depends on the level of women's presence. 
+
+2. The association between income and prestige is moderated by the level of women's presence. 
+
+3. The association between income and prestige is contingent on the amount of women in an industry. 
+
+4. The association of income with prestige is not the same when the presence of women is low as when the presence of women is high. 
+
+5. In industries with a lot of women, the association with income and prestige is different than the association of income with prestige in industries with few women.
+
+6. Income's association with prestige differs across industries with high versus low representation of women. 
+
+All these statements get at the same thing; namely, the fact that the association of one IV with the DV depends on the level of another IV. Now, lets actually run the regression. 
+```{r}
+#two ways
+#first, the long way
+summary(lm(prestige~income + women + income*women, Prestige))
+#second, a short-cut
+summary(lm(prestige~income*women, Prestige))
+```
+
+####Interpreting Coefficients with Interactions
+$\beta_0$, (Intercept): the prestige of a profession where income is 0 and where there are no women is 23.92. 
+
+$\beta_1$, (income): The the change in prestige for each one-dollar increase in income, holding the percentage of women constant is 0.002581. Substantively, how small is this coefficient?
+
+$\beta_2$, (women): the change in prestige for each one unit increase in the presence of women, holding income constant, is -0.1646.
+
+$\beta_3$ (income:women): the change in the association of prestige and income for each 1 unit increase in women in a given industry is 0.00007337.
+- Fleshing out: we can interpret this as saying that the influence of income on prestige is stronger in industries where the presence of women is higher. Or, for a 1 unit increase in the presence of women in an industry, the association between income and prestige by an additional 0.00007337 units for each dollar of income. 
+- When there are no women in an industry, the association of income with prestige is 0.002581. 
+- When the presence of women increases by 1 unit, the association of income on prestige becomes $0.002581 + (1*0.00007337) = 0.00265437$. When the presence of women is increased, the positive association between income and prestige becomes more pronounced. 
+
+#Activity: Practice Interpreting Regression Coefficients with Interactions
+
+####Example 1: Opposition to Affirmative Action, Education, Gender
+```{r}
+#recode so that women are 1 and men are 0
+cces$gender <- ifelse(cces$gender == 2, 1, 0)
+#recall, 
+#higher levels of aa indicate higher opposition to affirmative action
+summary(lm(aa~educ + gender, data = cces))
+```
+what is the prediction for a man?
+
+what is the prediction for a woman?
+
+if you were to draw a picture plotting the association of education and opposition to affirmative action among men versus women, what would it look like?
+
+```{r}
+summary(lm(aa~educ*gender, data = cces))
+```
+how do we interpret the interaction?
+
+if you were to draw a picture of the association of education with opposition to affirmative action among men versus women, what would it look like?
+
+####Example 2: Opposition to Environmental Protection, Opposition to Affirmative Action, Gender
+```{r}
+summary(lm(env~aa + gender, data = cces))
+```
+what is the prediction for a man?
+
+What is the prediction for a woman?
+
+if you were to draw a picture of the association of opposition to affirmative action and opposition to environmental regulation among men versus women, what would it look like?
+
+```{r}
+summary(lm(env~aa*gender, data = cces))
+```
+how do we interpret the interaction?
+
+if you were to draw a picture, what would it look like?
