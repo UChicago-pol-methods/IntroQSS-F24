@@ -45,11 +45,12 @@ To understand it we'll use (almost) everything we have learned.
 
 # Regression theory 
 
-## BLP with one predictor {.smaller}
-
 \def\E{{\textrm E}}
 \def\V{{\textrm V}}
 \def\bm{\boldsymbol}
+
+
+## BLP with one predictor {.smaller}
 
 
 - CEF (conditional expectation function): $\E[Y \mid X]$. Could be any shape.
@@ -85,21 +86,21 @@ If the prediction $\hat{Y}_i$ is based on a true population predictor (e.g. CEF 
 
 ## BLP with multiple predictors {.smaller}
 
-- CEF (conditional expectation function): $E[Y \mid \mathbf{X}]$. Could be any shape.
+- CEF (conditional expectation function): $\E[Y \mid \mathbf{X}]$. Could be any shape.
 - BLP (best linear predictor): MSE-minimizing vector of coefficients, i.e. 
 $$(\beta_0, \beta_1, \ldots, \beta_K) = \underset{(b_0, b_1, \ldots, b_K) \in \mathbb{R}^{K+1}}{\arg\min} \, \mathrm{E}\,[\left(Y - (b_0 + b_1X_{[1]} + \ldots + b_K X_{[K]})\right)^2]$$
 
 . . . 
 
-  - Can be viewed as BLP of $Y$ or BLP of CEF ($E[Y \mid \mathbf{X}]$)
-  - **Solution**: no simpler statement than the problem above 
+  - Can be viewed as BLP of $Y$ or BLP of CEF ($\E[Y \mid \mathbf{X}]$)
+  - **Solution**: no simpler statement than the problem above [(except $\left(\mathbb{X}'\mathbb{X}\right)^{-1} \, \mathbb{X}'\mathbf{Y}$)]{.gray}
 
 . . . 
 
 **Plug-in estimator** (Ordinary Least Squares, OLS):
 
 $$(\hat{\beta_0}, \hat{\beta_1}, \ldots, \hat{\beta_K}) = \underset{(b_0, b_1, \ldots, b_K) \in \mathbb{R}^{K+1}}{\arg\min} \, \frac{1}{n}\sum_{i =1}^n\, \left(Y - (b_0 + b_1X_{[1]} + \ldots + b_K X_{[K]})\right)^2,$$
-i.e. choose coefficients to minimize the mean of the squared residuals in the sample <!-- [(equivalently, sum of squared residuals)]{.gray} --> 
+i.e. choose coefficients to minimize the mean of the squared residuals *in the sample* <!-- [(equivalently, sum of squared residuals)]{.gray} --> 
 
 ## How do we solve this problem? {.smaller}
 
