@@ -65,7 +65,7 @@ Letting $n_1$ be the number of lottery winners and $n_0$ be the number of lotter
 
 **Answer**
 
-- Step 1 uses the "Variance Rule" (Theorem 2.2.3 in A&M) [Note there was a mistake on the problem set -- it should be a minus sign instead of a plus sign before the covariance term]
+- Step 1 uses the "Variance Rule" (Theorem 2.2.3 in A&M) [Note the minus sign: generally $\V[aX + bY] = a^2\V[X] + b^2\V[Y] + 2ab\text{Cov}[X, Y]$, but here $a = 1$ and $b = -1$.]
 - In Step 2 we eliminate the covariance term because the sample mean among lottery winners is independent of the sample mean among lottery losers across samples
 - In Step 3 we apply the variance of the sample mean (Theorem 3.2.4)
 
