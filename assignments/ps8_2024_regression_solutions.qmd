@@ -1,0 +1,234 @@
+---
+title: "Problem set 8: Regression"
+author: "(Your name here)"
+subtitle: "Due Dec 2, 2024, at 10am"
+format: pdf
+---
+
+\def\E{{\textrm E}}
+\def\V{{\textrm V}}
+
+*\textsc{Note}: Start with the file `ps8_2024_regression.qmd` (available from the github repository at <https://github.com/UChicago-pol-methods/IntroQSS-F24/tree/main/assignments>). Modify that file to include your answers. Make sure you can "render" the file (e.g. in RStudio by clicking on the `Render` button). Submit both the qmd file and the PDF via Canvas.* 
+
+
+The dataset `brexit_data_gb_subset.csv` (available on the github under data) contains results of the 2016 UK Brexit referendum by local authority (cities, counties, etc), collected from the Electoral Commission website and 2011 census data by Claire Peacock.
+
+```{r}
+#| message: false
+#| output: false 
+brexit <- read.csv("./../data/brexit_data_gb_subset.csv")
+library(tidyverse)
+```
+
+**Question 1**
+
+(1a) Having loaded the data, use `lm()` to regress `Percent_Leave` (the support for Brexit in the local authority) on `Region` (the region in which the local authority is located). Present a regression table using `modelsummary::modelsummary()` or a similar approach. 
+
+**Answer**:
+
+```{r}
+oc_reg <- lm(Percent_Leave ~ Region, data = brexit)
+modelsummary::modelsummary(oc_reg, gof_map = c("nobs", "r.squared"))
+```
+
+\vspace{.25in} 
+
+(1b) In the regression you just presented, what does the `(Intercept)` coefficient mean, i.e. what does that number signify?
+
+**Answer**: It indicates the average support for Brexit across local authorities in the omitted region, which is "East". 
+
+\vspace{.25in} 
+
+(1c) Using the regression output above, report and interpret a 95% confidence interval for the coefficient on `RegionLondon`.
+
+**Answer**: This coefficient measures the difference in average support for Brexit between local authorities in London and those in the East region. A 95% confidence interval for that difference is 
+
+```{r}
+coef(oc_reg)["RegionLondon"] + c(-1,1)*1.96*
+  summary(oc_reg)$coefficients["RegionLondon", "Std. Error"]
+```
+
+\vspace{.25in} 
+
+(1d) Using the regression above, what is the estimated average support for Brexit in London local authorities? 
+
+**Answer**: The estimated support for Brexit in London local authorities is the sum of the `(Intercept)` term and the `RegionLondon` term, i.e. 
+
+```{r}
+sum(coef(oc_reg)[c("(Intercept)", "RegionLondon")])
+```
+
+\vspace{.25in} 
+
+(1e) For this question you will produce several different estimates for the standard error of the estimated average support for Brexit in London local authorities.
+
+\vspace{.25in} 
+
+(1e.1) Compute the standard error using the regression above (hint: use variance rule and `vcov()`)
+
+**Answer**
+
+```{r}
+(se_london_lm <- sqrt(sum(vcov(oc_reg)[c("(Intercept)", "RegionLondon"), 
+                                       c("(Intercept)", "RegionLondon")])))
+```
+
+\vspace{.25in} 
+
+(1e.2) Obtain the standard error from the output of the regression of `Percent_Leave` on `Region` with no intercept (hint: add `-1` to the `formula` argument)
+
+**Answer**
+
+```{r}
+summary(lm(Percent_Leave ~ Region -1, 
+           data = brexit))$coefficients["RegionLondon", "Std. Error"]
+```
+
+\vspace{.25in} 
+
+(1e.3) Compute the standard error of the sample mean for London local authorities, i.e. with no regression 
+
+**Answer**
+
+```{r}
+sqrt(var(brexit$Percent_Leave[brexit$Region == "London"])/
+       sum(brexit$Region == "London"))
+```
+
+\vspace{.25in} 
+
+(1e.4) Compute the standard error as you did in (1e.1), except this time use `estimatr::lm_robust()` for the regression, which uses the "sandwich estimator" (Huber-White standard errors) and thus does not assume homoskedasticity
+
+**Answer**
+
+```{r}
+oc_reg_robust <- estimatr::lm_robust(Percent_Leave ~ Region, data = brexit)
+(se_london_lm_robust <- sqrt(sum(vcov(oc_reg_robust)[
+  c("(Intercept)", "RegionLondon"), c("(Intercept)", "RegionLondon")])))
+```
+
+\vspace{.25in} 
+
+(1e.5) What does homoskedasticity mean in this case? Check whether it appears to be valid using the regions of `London`, `East`, and `Scotland` as examples.
+
+**Answer**
+
+In general, homoskedasticity means that the variance of $Y$ does not vary with $X$. In this case it would mean that the variance of `Percent_Leave` is the same across regions.
+
+These three regions show that homoskedasticity is not a valid assumption in this case:
+
+```{r}
+var(brexit$Percent_Leave[brexit$Region == "London"])
+var(brexit$Percent_Leave[brexit$Region == "East"])
+var(brexit$Percent_Leave[brexit$Region == "Scotland"])
+```
+
+We can show this more comprehensively with this code: 
+
+```{r}
+brexit |> 
+  group_by(Region) |> 
+  summarize(region_var = var(Percent_Leave))
+```
+
+Essentially, the classical standard errors ignore the fact that the variance of the outcome varies across regions, so the estimated standard error for the predicted outcome in London reflects the average variance in outcomes across regions, not the variance specific to London. In this simple case, the standard error we want the regression to produce is really the standard error of the sample mean, and the robust standard errors give us that. 
+
+\vspace{.5in}
+
+
+**Question 2**
+
+(2a) Regress `Percent_Leave` on `Bachelors_deg_percent` (the percent of local authority inhabitants who have  at least a bachelors degree) and `Birth_UK_percent` (the percent of local authority inhabitants who were born in the UK). Interpret all of the coefficients.
+
+**Answer**
+
+```{r}
+reg2 <- lm(Percent_Leave ~ Bachelors_deg_percent + 
+             Birth_UK_percent, data = brexit)
+coef(reg2)
+```
+
+An increase in 1 percentage point in the share of inhabitants with a bachelors degree is associated with a decrease of .988 percentage points in support for Leave, holding fixed the proportion of inhabitants born in the UK.
+
+An increase in 1 percentage point in the proportion of inhabitants born in the UK is associated with an increase of .174 percentage points in support for Leave, holding fixed the share of inhabitants with a bachelors degree.
+
+The intercept is not really meaningful on its own -- it indicates that a local authority where none of the inhabitants have a bachelors degree or are born in the UK is predicted to have support for Leave of 65.7\%, but this isn't very useful because there is no such place. 
+
+\vspace{.25in} 
+
+(2b) Use the bootstrap (with $m=1000$ resamples) to compute standard errors for your coefficients. You should store the $m$ sets of coefficients in a matrix with $m$ rows and 3 columns.
+
+**Answer**
+
+```{r}
+# getting subset of dataset
+n <- nrow(brexit)
+m <- 1000
+sto <- matrix(NA, nrow = m, ncol = 3)
+colnames(sto) <- c("Intercept", "Bachelors", "Born_in_UK")
+for(i in 1:m){
+  this_dat <- brexit[sample(1:n, size = n, replace = T), ]
+  this_lm <- lm(Percent_Leave ~ Bachelors_deg_percent + 
+                  Birth_UK_percent, data = this_dat)
+  sto[i, ] <- coef(this_lm)
+}
+```
+
+Here are three ways to get standard errors from the bootstrap coefficients: 
+
+```{r}
+# standard deviation, column by column
+c(sd(sto[,1]), sd(sto[,2]), sd(sto[,3]))
+# applying the function `sd` to the 2nd dimension (the columns) of `sto`
+apply(sto, 2, sd) 
+# the square root of the diagonal of the variance-covariance matrix
+(bootstrap_ses <- sqrt(diag(cov(sto)))) 
+```
+
+\vspace{.25in} 
+
+(2c) Compare the standard errors you compute above to the classical standard errors generated by `lm()` and the robust (Huber-White) standard errors generated by `estimatr::lm_robust()`. 
+
+**Answer**
+
+The table below shows the three sets of standard errors: 
+
+```{r}
+reg2_robust <- estimatr::lm_robust(Percent_Leave ~ Bachelors_deg_percent + 
+                                     Birth_UK_percent, data = brexit)
+se_mat <- rbind(bootstrap_ses, summary(reg2)$coefficients[,"Std. Error"],
+                summary(reg2_robust)$coefficients[,"Std. Error"])
+rownames(se_mat) <- c("Bootstrap", "Classical", "Robust")
+se_mat
+```
+The robust standard errors and the bootstrap standard errors are very similar; the classical standard errors are lower. This suggests there is heteroskedasticity in the data. 
+
+\vspace{.25in} 
+
+(2d) Report the variance-covariance matrix of your bootstrap coefficient estimates. Interpret the bottom left entry of the matrix; what explains its sign? Confirm that it is similar to the variance-covariance matrix you obtain by running the regression with `estimatr::lm_robust()`. 
+
+**Answer**
+
+This is the variance-covariance matrix: 
+
+```{r}
+cov(sto)
+```
+The bottom-left entry indicates that the covariance between the coefficient estimates for the proportion born in the UK and the coefficient estimates for the intercept is about -.096. You can plot this to see the negative covariance: 
+
+```{r}
+plot(sto[,"Intercept"], sto[, "Born_in_UK"], type = "p", pch = 19)
+```
+
+The reason for the negative covariance is that in samples where the slope on `Birth_UK_percent` is larger, the intercept tends to be smaller (and vice versa). Similarly, in the illustration below, the line with the lower slope (the solid one) has a higher intercept. 
+
+```{r}
+expand_grid(x = seq(-1, 1, length = 100),
+            case = c("More steep", "Less steep")) |> 
+  mutate(y = ifelse(case == "More steep", x*.75, x*.5),
+         x = x + 1) |> 
+  ggplot(aes(x, y, lty = case)) + 
+  geom_line(show.legend = F) 
+```
+
+
