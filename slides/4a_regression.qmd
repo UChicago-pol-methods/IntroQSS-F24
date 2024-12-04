@@ -643,7 +643,7 @@ Often we are interested in linear combinations of coefficients, e.g.
 - because a quantity of interest is estimated by the sum of coefficients: e.g. in interactive model above,
     - estimated reply rate for Democrats receiving Deshawn email is $\hat{\beta}_0 + \hat{\beta}_1$
     - estimated effect of Deshawn email for Republicans is $\hat{\beta}_1 + \hat{\beta}_3$
-- because we want to predict the outcome at specific values of the predictors: e.g. $\hat{Y}_i = \hat{\beta}_0 + 2\hat{\beta}_1 + 3\hat{\beta}_1$
+- because we want to predict the outcome at specific values of the predictors: e.g. $\hat{Y}_i = \hat{\beta}_0 + 2\hat{\beta}_1 + 3\hat{\beta}_2$
 
 . . . 
 
