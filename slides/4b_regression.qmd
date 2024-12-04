@@ -351,7 +351,39 @@ y <- c(1, 3, 3)
 
 ```{r}
 #| echo: true
-solve(B)%*%D # using inverse to solve the system of eqns
+# getting the inverse:
+solve(B)
+```
+
+. . . 
+
+```{r}
+#| echo: true
+# confirming it does what it should
+solve(B)%*%B
+```
+
+
+## The inverse: implementation (2) {.smaller}
+
+Recall our toy dataset, and the system of equations $\mathbb{B} \beta = \mathbf{D}$ that represents the first order conditions for the $\beta$ vector that minimizes the sum of squared residuals:
+
+```{r}
+#| echo: true
+# creating our matrices for one toy dataset
+x <- c(1, 2, 3)
+y <- c(1, 3, 3)
+B <- cbind(c(length(x), sum(x)), c(sum(x), sum(x^2)))
+D <- c(sum(y), sum(x*y))
+```
+
+. . . 
+
+Using `solve()`, we compute $\hat{\beta} = \mathbb{B}^{-1}\mathbf{D}$ to solve the system of equations:
+
+```{r}
+#| echo: true
+solve(B)%*%D 
 ```
 
 . . . 
@@ -365,6 +397,8 @@ lm(y ~ x) |> coef()
 . . . 
 
 So we have (1) a way to represent systems of equations and (2) a way to solve them. 
+
+The remaining bottleneck: getting the system of equations from the data (expand sum of squared residuals, take derivative, etc).
 
 # The general OLS estimator in matrix form
 
@@ -522,3 +556,29 @@ Also see [video on variance of OLS estimator given homoskedasticity](https://www
 
 <!-- could do something on inference -- consider next year. -->
 
+# Overall takeaways
+
+## Goals for course
+
+Our goal in this class was to "understand topics every social scientist needs to know":
+
+- Linear regression (OLS) 
+- Statistical inference (standard errors, p-values, null hypothesis)
+
+Review list of (mis)conceptions in Lecture [0](./../0_introduction.html)!
+
+## Goals for course (2)
+
+Quant methods is about clarifying what can be learned from observing and counting things in the world.
+
+. . . 
+
+This can be surprisingly difficult! But we hope you 
+
+- see why it is important to do this correctly, and 
+- recognize that with effort you can understand any area (seriously!) of applied methods, and
+- even enjoy some part of that process? 
+
+. . . 
+
+**Remember**: often data collection is most important, and with great data we usually don't need fancy methods.
